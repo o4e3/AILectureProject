@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,12 +27,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.ral.project.AppNavigator
-
+import org.ral.project.presentation.theme.SplashBackgroundColor
 
 
 @Composable
 fun LoginView(navigator: AppNavigator) {
-    Scaffold {
+    Scaffold (
+        backgroundColor = SplashBackgroundColor
+    ) {
         Column(
             modifier = Modifier
                 .padding(it)
