@@ -18,12 +18,13 @@ import ailectureprojectclient.composeapp.generated.resources.compose_multiplatfo
 import androidx.compose.material.MaterialTheme.colors
 import org.ral.project.presentation.theme.CustomAppTheme
 import org.ral.project.presentation.view.HomeView
+import org.ral.project.presentation.view.login.LoginView
 
 @Composable
 @Preview
 fun App() {
     CustomAppTheme {
         // 바로 HomeView 로 이동
-        HomeView()
+        LoginView()
     }
 }
