@@ -10,6 +10,7 @@ plugins {
 }
 
 kotlin {
+    tasks.create("testClasses")
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -36,7 +37,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-
+            implementation(libs.androidx.navigation.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -66,6 +67,10 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    sourceSets["main"].apply {
+        res.srcDirs("src/androidMain/res", "src/commonMain/composeResources")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -80,11 +85,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-}
-
-dependencies {
-    implementation(libs.androidx.foundation.layout.android)
-    debugImplementation(compose.uiTooling)
 }
 
 compose.desktop {
