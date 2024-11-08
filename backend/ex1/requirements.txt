@@ -1,0 +1,5 @@
+fastapi==0.95.2
+uvicorn==0.21.1
+httpx==0.24.1
+python-dotenv==1.0.0
+httpx-ouath==0.15.1
