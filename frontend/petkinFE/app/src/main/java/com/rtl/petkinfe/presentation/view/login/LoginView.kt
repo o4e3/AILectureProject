@@ -48,7 +48,7 @@ fun LoginView(navigator: AppNavigator) {
 
             // 카카오 로그인 버튼
             Image(
-                painter = painterResource(R.drawable.kakao_login),
+                painter = painterResource(R.drawable.btn_kakao),
                 contentDescription = "Kakao Login",
                 modifier = Modifier
                     .size(width = 330.dp, height = 64.dp)

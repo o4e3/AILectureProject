@@ -1,10 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- 스플래시 화면 백그라운드 컬러 -->
+    <color name="splash_background_color">#FFF7E8</color>
+
+    <!-- 아이콘 액티브 컬러 -->
+    <color name="photo_icon_active_color">#FF9626</color>
+    <color name="bath_icon_active_color">#009DFF</color>
+    <color name="walk_icon_active_color">#75EE05</color>
+    <color name="snack_icon_active_color">#FCBDEB</color>
+    <color name="medicine_icon_active_color">#FFC711</color>
+    <color name="vaccination_icon_active_color">#6D6D6D</color>
+    <color name="hospital_icon_active_color">#F49393</color>
+    <color name="memo_icon_active_color">#C109C1</color>
+
+    <!-- 달력 선택 컬러 -->
+    <color name="calendar_active_color">#FF9626</color>
+
+    <!-- 기본 Stroke 컬러 -->
+    <color name="default_stroke_color">#5F5F5F</color>
+
+    <!-- 메인 버튼 컬러 -->
+    <color name="main_button_color">#FF9626</color>
+
+    <!-- 바텀바 아이콘 컬러 -->
+    <color name="bottom_bar_inactive_icon_color">#BBBBBB</color>
+    <color name="bottom_bar_active_icon_color">#FF9626</color>
+
+    <!-- 섹션 배경 색상 -->
+    <color name="photo_section_background_color">#FFEECB</color>
+    <color name="walk_section_background_color">#F1FFDC</color>
+    <color name="bath_section_background_color">#E0F3FF</color>
+    <color name="snack_section_background_color">#FFE1F7</color>
+    <color name="medicine_section_background_color">#FFFBCB</color>
+
+    <!-- Border 컬러 -->
+    <color name="border_color">#BBBBBB</color>
 </resources>

@@ -44,12 +44,12 @@ fun IconSection() {
             .padding(vertical = 8.dp, horizontal = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.camera_icon), contentDescription = "사진", tint = Color.Gray)
-        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.drop_icon), contentDescription = "목욕", tint = Color.Gray)
-        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.goal_icon), contentDescription = "산책", tint = Color.Gray)
-        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.bone_icon), contentDescription = "간식", tint = Color.Gray)
-        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.pen_icon), contentDescription = "접종", tint = Color.Gray)
-        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.heart_icon), contentDescription = "병원", tint = Color.Gray)
-        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.edit_box_icon), contentDescription = "메모", tint = Color.Gray)
+        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.ic_camera), contentDescription = "사진", tint = Color.Gray)
+        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.ic_drop), contentDescription = "목욕", tint = Color.Gray)
+        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.ic_goal), contentDescription = "산책", tint = Color.Gray)
+        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.ic_bone), contentDescription = "간식", tint = Color.Gray)
+        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.ic_pen), contentDescription = "접종", tint = Color.Gray)
+        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.ic_heart), contentDescription = "병원", tint = Color.Gray)
+        Icon(painter = painterResource(com.rtl.petkinfe.R.drawable.ic_edit_box), contentDescription = "메모", tint = Color.Gray)
     }
 }

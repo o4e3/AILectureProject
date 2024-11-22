@@ -1,9 +1,4 @@
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -59,7 +54,7 @@ fun BottomNavigation(navController: NavHostController) {
 }
 
 sealed class BottomNavItem(val title: Int, val icon: Int, val screenRoute: String) {
-    object Calendar : BottomNavItem(R.string.text_calendar, R.drawable.calendar_icon, "calendar")
-    object Home : BottomNavItem(R.string.text_home, R.drawable.home_icon, "home")
-    object User : BottomNavItem(R.string.text_user, R.drawable.user_icon, "user")
+    object Calendar : BottomNavItem(R.string.text_calendar, R.drawable.ic_calendar, "calendar")
+    object Home : BottomNavItem(R.string.text_home, R.drawable.ic_home, "home")
+    object User : BottomNavItem(R.string.text_user, R.drawable.ic_user, "user")
 }
