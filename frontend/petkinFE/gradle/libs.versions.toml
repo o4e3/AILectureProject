@@ -11,6 +11,7 @@ composeBom = "2023.08.00"
 navigationRuntimeKtx = "2.8.4"
 navigationCompose = "2.8.4"
 splashscreen = "1.0.0-alpha01"
+kakaoSdk = "2.20.6"
 
 [libraries]
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
@@ -30,6 +31,16 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+
+# Kakao SDK
+kakao-sdk-all = { group = "com.kakao.sdk", name = "v2-all", version.ref = "kakaoSdk" }
+kakao-sdk-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoSdk" }
+kakao-sdk-share = { group = "com.kakao.sdk", name = "v2-share", version.ref = "kakaoSdk" }
+kakao-sdk-talk = { group = "com.kakao.sdk", name = "v2-talk", version.ref = "kakaoSdk" }
+kakao-sdk-friend = { group = "com.kakao.sdk", name = "v2-friend", version.ref = "kakaoSdk" }
+kakao-sdk-navi = { group = "com.kakao.sdk", name = "v2-navi", version.ref = "kakaoSdk" }
+kakao-sdk-cert = { group = "com.kakao.sdk", name = "v2-cert", version.ref = "kakaoSdk" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

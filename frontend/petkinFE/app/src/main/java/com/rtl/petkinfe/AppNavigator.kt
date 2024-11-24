@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rtl.petkinfe.presentation.view.home.HomeView
-import com.rtl.petkinfe.presentation.view.login.LoginView
+import com.rtl.petkinfe.presentation.view.login.LoginScreen
 
 interface AppNavigator {
     fun navigateToLogin()
@@ -23,11 +23,10 @@ fun AppNavigation() {
         startDestination = "login" // 시작 화면을 LoginView로 설정
     ) {
         composable("login") {
-            LoginView(navigator = object : AppNavigator {
+            LoginScreen(navigator = object : AppNavigator {
                 override fun navigateToLogin() {
-                    // 이미 LoginView에 있기 때문에 처리 없음
+                    TODO("Not yet implemented")
                 }
-
                 override fun navigateToHome() {
                     navController.navigate("home") // 홈 화면으로 이동
                 }

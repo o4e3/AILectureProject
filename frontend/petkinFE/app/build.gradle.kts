@@ -1,7 +1,14 @@
+import java.util.Properties
+
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
 }
+
+val properties = Properties()
+properties.load(rootProject.file("local.properties").inputStream())
+
 
 android {
     namespace = "com.rtl.petkinfe"
@@ -19,7 +26,20 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        buildConfigField(
+            "String",
+            "KAKAO_API_KEY",
+            "\"${properties["KAKAO_API_KEY"]}\""
+        )
+        resValue(
+            "string",
+            "KAKAO_REDIRECT_URI",
+            properties["KAKAO_REDIRECT_URI"].toString()
+        )
+
     }
+
+
 
     buildTypes {
         release {
@@ -39,6 +59,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -69,4 +90,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.kakao.sdk.user)
 }
