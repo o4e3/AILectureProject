@@ -4,6 +4,8 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.hilt) // Hilt 플러그인 추가
+    id("kotlin-kapt") // Kapt 플러그인 추가
 }
 
 val properties = Properties()
@@ -91,4 +93,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.kakao.sdk.user)
+    implementation(libs.hilt.android) // Hilt Android 라이브러리
+    kapt(libs.hilt.compiler) // Hilt 컴파일러
 }
