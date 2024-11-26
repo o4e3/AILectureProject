@@ -5,7 +5,7 @@
 
 ---
 
-### 1. 가상 환경 생성
+### 1. 가상 환경 생성 (필수)
 > 가상환경이 이미 있다면 해당 폴더를 삭제한 후 진행하세요.
 ```bash
 python -m venv fastapi_env
@@ -14,7 +14,7 @@ python -m venv fastapi_env
 
 ---
 
-### 2. 가상 환경 활성화
+### 2. 가상 환경 활성화 (필수)
 - **macOS / Linux**:
   ```bash
   source fastapi_env/bin/activate
@@ -30,15 +30,15 @@ python -m venv fastapi_env
 
 ---
 
-### 3. 패키지 설치
+### 3. 패키지 설치 (필수)
 가상 환경을 활성화한 상태에서 `requirements.txt`에 명시된 기존 패키지를 설치합니다:
 ```bash
 pip install -r requirements.txt
 ```
-
+- 여기까지 하면 기본 설정은 완료이고 아래 설정은 참고할 것들
 ---
 
-### 4. 가상 환경 비활성화
+### 4. 가상 환경 비활성화 (선택)
 가상 환경 사용이 끝난 후 비활성화합니다:
 ```bash
 deactivate
@@ -46,8 +46,9 @@ deactivate
 
 ---
 
-### 5. 추가 패키지 설치
-새로운 패키지를 설치한 후 `requirements.txt`에 반영하려면 아래 명령어를 실행합니다:
+### 5. 추가 패키지 설치 (선택)
+- 혹시라도 새로운 패키지를 설치하게 된다면 이런식으로 하면 됩니다.
+- 새로운 패키지를 설치한 후 `requirements.txt`에 반영하려면 아래 명령어를 실행합니다:
 ```bash
 pip freeze > requirements.txt
 ```
