@@ -70,7 +70,10 @@ pip install -r requirements.txt
 - `database.py` 에서 데이터베이스 연동을 진행합니다.
 - `models.py` 에서 데이터베이스 테이블의 ORM 모델을 작성합니다.
 - 파일 구조는 다음과 같습니다.
-![스크린샷 2024-11-26 오전 11.09.35.png](..%2F..%2F..%2F..%2F..%2Fvar%2Ffolders%2Fyy%2F8lnyk3gj74x15_c67_dsvtg00000gn%2FT%2FTemporaryItems%2FNSIRD_screencaptureui_vZL2oq%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-11-26%20%EC%98%A4%EC%A0%84%2011.09.35.png)
+  <br>
+  <img width="448" alt="스크린샷 2024-11-26 오전 11 18 41" src="https://github.com/user-attachments/assets/530fd97d-fa86-46e0-9ec7-e99d7b8dcbfd">
+
 
 - 실행 시 backend 폴더의 위치에서 `uvicorn petkinApp.main:app --reload` 을 실행하여 시작합니다.
-![스크린샷 2024-11-26 오전 11.11.19.png](..%2F..%2F..%2F..%2F..%2Fvar%2Ffolders%2Fyy%2F8lnyk3gj74x15_c67_dsvtg00000gn%2FT%2FTemporaryItems%2FNSIRD_screencaptureui_6GfvzO%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-11-26%20%EC%98%A4%EC%A0%84%2011.11.19.png)
+
+<img width="767" alt="스크린샷 2024-11-26 오전 11 19 20" src="https://github.com/user-attachments/assets/78810788-c2e4-4f56-9bed-928efc58ad25">
