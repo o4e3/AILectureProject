@@ -11,6 +11,9 @@ plugins {
 val properties = Properties()
 properties.load(rootProject.file("local.properties").inputStream())
 
+hilt {
+    enableAggregatingTask = false
+}
 
 android {
     namespace = "com.rtl.petkinfe"
@@ -28,11 +31,13 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
         buildConfigField(
             "String",
-            "KAKAO_API_KEY",
-            "\"${properties["KAKAO_API_KEY"]}\""
+            "KAKAO_APP_KEY",
+            "\"${properties["KAKAO_APP_KEY"] ?: ""}\""
         )
+        manifestPlaceholders["KAKAO_APP_KEY"] = properties["KAKAO_APP_KEY"].toString()
         resValue(
             "string",
             "KAKAO_REDIRECT_URI",
@@ -94,5 +99,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.kakao.sdk.user)
     implementation(libs.hilt.android) // Hilt Android 라이브러리
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     kapt(libs.hilt.compiler) // Hilt 컴파일러
+    implementation(libs.androidx.datastore.preferences)
 }

@@ -5,25 +5,33 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rtl.petkinfe.ui.theme.PetkinFETheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val viewModel: MainViewModel by viewModels()
         // Splash Screen 설정
         installSplashScreen().apply {
             setKeepVisibleCondition {
-                !viewModel.isReady.value // ViewModel이 준비될 때까지 유지
+                !viewModel.isReady.value
             }
+
         }
 
         // Kakao SDK 초기화 완료 여부 확인
         setContent {
+            val viewModel: MainViewModel = hiltViewModel()
+            val isReady by viewModel.isReady.collectAsState()
+
             PetkinFETheme {
-                if (viewModel.isReady.collectAsState().value) {
-                    AppNavigation() // 초기화 후 Navigation 실행
+                if (isReady) {
+                    AppNavigation()
                 }
             }
         }

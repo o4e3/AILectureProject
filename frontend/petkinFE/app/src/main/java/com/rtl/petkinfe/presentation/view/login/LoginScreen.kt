@@ -22,15 +22,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rtl.petkinfe.AppNavigator
 import com.rtl.petkinfe.R
 import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
+import dagger.hilt.android.AndroidEntryPoint
 
 
 @Composable
-fun LoginScreen(navigator: AppNavigator) {
-    val viewModel: LoginViewModel = viewModel()
+fun LoginScreen() {
+    val viewModel: LoginViewModel = hiltViewModel()
     val context = LocalContext.current
     val loginState by viewModel.loginState.collectAsState()
     Scaffold(
@@ -76,7 +78,7 @@ fun LoginScreen(navigator: AppNavigator) {
             Log.d("LoginView", "로그인 성공! 토큰: $token")
 
             // 로그인 성공 시 메인 화면으로 이동
-            navigator.navigateToHome()
+            (context as AppNavigator).navigateToHome()
         }
         is LoginViewModel.LoginState.Failure -> {
             Toast.makeText(context, "로그인 실패", Toast.LENGTH_SHORT).show()

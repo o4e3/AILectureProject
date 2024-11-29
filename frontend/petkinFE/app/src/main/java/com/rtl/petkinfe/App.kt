@@ -5,8 +5,8 @@ import com.rtl.petkinfe.presentation.view.login.LoginScreen
 import com.rtl.petkinfe.ui.theme.PetkinFETheme
 
 @Composable
-fun App(navigator: AppNavigator) {
+fun App() {
     PetkinFETheme {
-        LoginScreen(navigator)
+        LoginScreen()
     }
 }

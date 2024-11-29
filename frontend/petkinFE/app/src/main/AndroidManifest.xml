@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MyApplication"
@@ -37,7 +38,7 @@
 
                 <data
                     android:host="oauth"
-                    android:scheme="@string/KAKAO_REDIRECT_URI" />
+                    android:scheme="kakao${KAKAO_APP_KEY}"  />
             </intent-filter>
         </activity>
     </application>

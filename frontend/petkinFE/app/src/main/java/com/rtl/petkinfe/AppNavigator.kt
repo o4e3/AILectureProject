@@ -23,14 +23,7 @@ fun AppNavigation() {
         startDestination = "login" // 시작 화면을 LoginView로 설정
     ) {
         composable("login") {
-            LoginScreen(navigator = object : AppNavigator {
-                override fun navigateToLogin() {
-                    TODO("Not yet implemented")
-                }
-                override fun navigateToHome() {
-                    navController.navigate("home") // 홈 화면으로 이동
-                }
-            })
+            LoginScreen() // LoginView Composable 호출
         }
 
         // 홈 화면 경로 추가
