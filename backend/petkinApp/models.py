@@ -22,7 +22,7 @@ DB 테이블과 동일하게 만들기 (확인하면 삭졔)
 
 class Customers(Base):
     __tablename__ = 'Customers'  # MySQL 테이블 이름
-    customer_id = Column(BigInteger, primary_key=True, autoincrement=True, comment="Primary Key, Auto Increment")
+    customer_id = Column(BigInteger, primary_key=True)
     nickname = Column(String(100), nullable=True)
     email = Column(String(255), nullable=True, unique=True, comment="unique")
     refresh_token = Column(String(255), nullable=True)
