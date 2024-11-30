@@ -11,6 +11,8 @@ from petkinApp.models import Customers
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security import APIKeyHeader
 
+from petkinApp.security import BearerTokenHeader
+
 """
 이 파일은 카카오 OAuth 로그인을 처리하고 JWT 토큰을 발급하는 API를 구현
 
@@ -20,8 +22,9 @@ from fastapi.security import APIKeyHeader
 
 # OAuth2PasswordBearer 설정
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/customers/oauth/login/KAKAO")
-# APIKeyHeader를 사용해 Bearer 토큰 처리
-api_key_header = APIKeyHeader(name="Authorization")
+
+# 커스텀 BearerTokenHeader 사용
+api_key_header = BearerTokenHeader(name="Authorization")
 
 # Pydantic 모델 정의
 class KakaoTokenRequest(BaseModel):
@@ -77,35 +80,44 @@ async def kakao_login(token_request: KakaoTokenRequest, db: Session = Depends(ge
     return {"accessToken": access_token, "refreshToken": refresh_token}
 
 
+# JWT 생성 시 sub 필드를 문자열로 변환
 def create_jwt_token(data: dict, expires_delta: timedelta = timedelta(minutes=30)):
     """
     JWT 토큰 생성 함수
-    :param data: JWT 페이로드 데이터
-    :param expires_delta: 토큰 만료 시간 (기본값: 30분)
-    :return: 생성된 JWT 토큰
     """
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})  # 만료 시간 추가
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    # 'sub' 필드가 존재하면 문자열로 변환
+    if "sub" in to_encode:
+        to_encode["sub"] = str(to_encode["sub"])
+
+    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    # 디코딩 테스트
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"Generated Token: {token}")
+        print(f"Decoded Payload: {payload}")
+    except Exception as e:
+        print(f"Error decoding token right after generation: {e}")
+
+    return token
 
 
-def decode_jwt_token(authorization: str = Depends(api_key_header)):
+def decode_jwt_token(token: str = Depends(api_key_header)):
     """
     JWT 토큰 검증 및 디코딩
-    :param authorization: Authorization 헤더에서 받은 토큰
-    :return: 디코딩된 데이터
     """
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Bearer 토큰 형식이 올바르지 않습니다.")
-    token = authorization.split(" ")[1]
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="토큰이 만료되었습니다.")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다.")
+    except jwt.InvalidTokenError as e:
+        print(f"Invalid Token Error: {e}")
+        raise HTTPException(status_code=401, detail=f"유효하지 않은 토큰입니다: {str(e)}")
 
 
 
@@ -118,23 +130,24 @@ def upsert_customer(
 ):
     """
     고객 정보를 삽입하거나 업데이트하는 함수
-    :param db: SQLAlchemy 세션
-    :param kakao_id: 카카오 사용자 ID
-    :param nickname: 닉네임
-    :param email: 이메일
-    :param refresh_token: 새 리프레시 토큰
     """
     try:
-        # 기존 고객 찾기
+        # 먼저 이메일 기준으로 기존 고객 검색
+        print(f"Checking for existing customer with email: {email}")
         customer = db.query(Customers).filter(Customers.email == email).first()
 
         if customer:
-            # 기존 고객 정보 업데이트
+            # 이메일이 존재하는 경우 해당 고객 정보를 업데이트
+            print(f"Updating existing customer: {customer}")
+            customer.customer_id = kakao_id  # customer_id도 업데이트
+            customer.nickname = nickname
             customer.refresh_token = refresh_token
-            customer.nickname = nickname  # 닉네임도 변경 가능
+            customer.auth_provider = "KAKAO"
         else:
             # 신규 고객 삽입
+            print(f"Inserting new customer with email: {email}")
             new_customer = Customers(
+                customer_id=kakao_id,
                 nickname=nickname,
                 email=email,
                 refresh_token=refresh_token,
@@ -145,7 +158,10 @@ def upsert_customer(
         db.commit()  # 데이터 저장
     except Exception as e:
         db.rollback()
+        print(f"DB 작업 실패: {str(e)}")
         raise HTTPException(status_code=500, detail=f"DB 작업 실패: {str(e)}")
+
+
 
 
 @router.get("/me")
