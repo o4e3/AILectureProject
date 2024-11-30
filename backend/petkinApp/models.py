@@ -8,15 +8,15 @@ from sqlalchemy import Column, BigInteger, Integer, String, Boolean, ForeignKey
 DB 테이블과 동일하게 만들기 (확인하면 삭졔)
 """
 
-# TODO 아래는 테스트 코드로 이해했으면 삭제하기!
-class Todos(Base):
-    __tablename__ = 'todos'
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    description = Column(String)
-    priority = Column(Integer)
-    complete = Column(Boolean, default=False)
-    owner_id = Column(Integer, default=1234)
+# # TODO 아래는 테스트 코드로 이해했으면 삭제하기!
+# class Todos(Base):
+#     __tablename__ = 'todos'
+#     id = Column(Integer, primary_key=True, index=True)
+#     title = Column(String)
+#     description = Column(String)
+#     priority = Column(Integer)
+#     complete = Column(Boolean, default=False)
+#     owner_id = Column(Integer, default=1234)
 
 
 
