@@ -9,26 +9,41 @@ import kotlinx.coroutines.flow.map
 
 class TokenDataSource(private val context: Context) {
     private val Context.dataStore by preferencesDataStore(name = "user_prefs")
-    private val TOKEN_KEY = stringPreferencesKey("access_token")
+    private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
+    private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
 
     // Save token
-    suspend fun saveToken(token: String) {
+    suspend fun saveToken(accessToken: String, refreshToken: String) {
         context.dataStore.edit { prefs ->
-            prefs[TOKEN_KEY] = token
+            prefs[ACCESS_TOKEN_KEY] = accessToken
+            prefs[REFRESH_TOKEN_KEY] = refreshToken
         }
     }
 
     // Get token
-    fun getToken(): Flow<String?> {
+    fun getAccessToken(): Flow<String?> {
         return context.dataStore.data.map { prefs ->
-            prefs[TOKEN_KEY]
+            prefs[ACCESS_TOKEN_KEY]
+        }
+    }
+
+    fun getRefreshToken(): Flow<String?> {
+        return context.dataStore.data.map { prefs ->
+            prefs[REFRESH_TOKEN_KEY]
+        }
+    }
+    // Check if logged in
+    fun isLoggedIn(): Flow<Boolean> {
+        return getAccessToken().map { accessToken ->
+            !accessToken.isNullOrEmpty()
         }
     }
 
     // Clear token
     suspend fun clearToken() {
         context.dataStore.edit { prefs ->
-            prefs.remove(TOKEN_KEY)
+            prefs.remove(ACCESS_TOKEN_KEY)
+            prefs.remove(REFRESH_TOKEN_KEY)
         }
     }
 }

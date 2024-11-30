@@ -24,7 +24,7 @@ class MainViewModel @Inject constructor(private val authRepository: AuthReposito
     init {
         viewModelScope.launch {
             delay(1000)
-            val token = authRepository.getToken().toString()
+            val token = authRepository.getAccessToken().toString()
             initialize(token)
         }
     }

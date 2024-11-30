@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.rtl.petkinfe.AppNavigator
 import com.rtl.petkinfe.presentation.view.home.components.ExpandableCardSection
 import com.rtl.petkinfe.presentation.view.home.components.IconSection
 import com.rtl.petkinfe.presentation.view.home.components.TitleSection

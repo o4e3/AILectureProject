@@ -32,6 +32,11 @@ android {
             useSupportLibrary = true
         }
 
+        defaultConfig {
+            val apiBaseUrl: String = getApiBaseUrl()
+            buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        }
+
         buildConfigField(
             "String",
             "KAKAO_APP_KEY",
@@ -102,4 +107,16 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     kapt(libs.hilt.compiler) // Hilt 컴파일러
     implementation(libs.androidx.datastore.preferences)
+}
+
+// local.properties 파일에서 API_BASE_URL 읽어오는 함수
+fun getApiBaseUrl(): String {
+    val localProperties = project.rootProject.file("local.properties")
+    if (localProperties.exists()) {
+        val properties = Properties().apply {
+            load(localProperties.inputStream())
+        }
+        return properties.getProperty("API_BASE_URL", "https://example.com/")
+    }
+    return "https://example.com/" // 기본값
 }

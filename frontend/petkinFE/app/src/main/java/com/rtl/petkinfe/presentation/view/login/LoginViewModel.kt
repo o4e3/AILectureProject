@@ -27,6 +27,7 @@ class LoginViewModel @Inject constructor(
                     _loginState.value = LoginState.Failure(error)
                 } else if (token != null) {
                     _loginState.value = LoginState.Success(token.accessToken)
+                    sendKakaoTokenToServer(token.accessToken)
                 }
             }
         } else {
@@ -35,7 +36,19 @@ class LoginViewModel @Inject constructor(
                     _loginState.value = LoginState.Failure(error)
                 } else if (token != null) {
                     _loginState.value = LoginState.Success(token.accessToken)
+                    sendKakaoTokenToServer(token.accessToken)
                 }
+            }
+        }
+    }
+
+    private fun sendKakaoTokenToServer(accessToken: String) {
+        viewModelScope.launch {
+            val result = authRepository.sendKakaoToken(accessToken)
+            if (result) {
+                _loginState.value = LoginState.Success(accessToken)
+            } else {
+                _loginState.value = LoginState.Failure(Throwable("Failed to send token to server"))
             }
         }
     }
@@ -52,11 +65,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun saveToken(token: String) {
-        viewModelScope.launch {
-            authRepository.saveToken(token)
-        }
-    }
 
     sealed class LoginState {
         object Idle : LoginState()
