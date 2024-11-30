@@ -4,11 +4,16 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.hilt) // Hilt 플러그인 추가
+    id("kotlin-kapt") // Kapt 플러그인 추가
 }
 
 val properties = Properties()
 properties.load(rootProject.file("local.properties").inputStream())
 
+hilt {
+    enableAggregatingTask = false
+}
 
 android {
     namespace = "com.rtl.petkinfe"
@@ -26,11 +31,18 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        defaultConfig {
+            val apiBaseUrl: String = getApiBaseUrl()
+            buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        }
+
         buildConfigField(
             "String",
-            "KAKAO_API_KEY",
-            "\"${properties["KAKAO_API_KEY"]}\""
+            "KAKAO_APP_KEY",
+            "\"${properties["KAKAO_APP_KEY"] ?: ""}\""
         )
+        manifestPlaceholders["KAKAO_APP_KEY"] = properties["KAKAO_APP_KEY"].toString()
         resValue(
             "string",
             "KAKAO_REDIRECT_URI",
@@ -91,4 +103,20 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.kakao.sdk.user)
+    implementation(libs.hilt.android) // Hilt Android 라이브러리
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    kapt(libs.hilt.compiler) // Hilt 컴파일러
+    implementation(libs.androidx.datastore.preferences)
+}
+
+// local.properties 파일에서 API_BASE_URL 읽어오는 함수
+fun getApiBaseUrl(): String {
+    val localProperties = project.rootProject.file("local.properties")
+    if (localProperties.exists()) {
+        val properties = Properties().apply {
+            load(localProperties.inputStream())
+        }
+        return properties.getProperty("API_BASE_URL", "https://example.com/")
+    }
+    return "https://example.com/" // 기본값
 }
