@@ -23,15 +23,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.rtl.petkinfe.AppNavigator
+import androidx.navigation.NavController
 import com.rtl.petkinfe.R
+import com.rtl.petkinfe.navigation.PetkinScreens
 import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
-import dagger.hilt.android.AndroidEntryPoint
 
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onLoginSuccess: () -> Unit) {
     val viewModel: LoginViewModel = hiltViewModel()
     val context = LocalContext.current
     val loginState by viewModel.loginState.collectAsState()
@@ -71,14 +70,9 @@ fun LoginScreen() {
         }
     }
 
-    // 로그인 상태 처리
     when (loginState) {
         is LoginViewModel.LoginState.Success -> {
-            val token = (loginState as LoginViewModel.LoginState.Success).token
-            Log.d("LoginView", "로그인 성공! 토큰: $token")
-
-            // 로그인 성공 시 메인 화면으로 이동
-            (context as AppNavigator).navigateToHome()
+            onLoginSuccess()
         }
         is LoginViewModel.LoginState.Failure -> {
             Toast.makeText(context, "로그인 실패", Toast.LENGTH_SHORT).show()

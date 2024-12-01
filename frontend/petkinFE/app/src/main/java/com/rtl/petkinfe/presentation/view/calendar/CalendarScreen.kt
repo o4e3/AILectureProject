@@ -22,29 +22,14 @@ import androidx.navigation.NavHostController
 import com.rtl.petkinfe.presentation.view.home.components.ExpandableCardSection
 import com.rtl.petkinfe.presentation.view.home.components.TitleSection
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarView(navController: NavHostController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("캘린더") },
-                navigationIcon = {
-                    IconButton(onClick = { /* Do Something */ }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                    }
-                }
-            )
-        },
-    ) {
-            paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
+fun CalendarScreen(navController: NavHostController) {
+        Column(modifier = Modifier.padding(16.dp)) {
             // 날짜 섹션과 캘린더 섹션을 추가
             TitleSection() // 날짜를 표시하는 섹션
             CalendarContent() // 캘린더 뷰 추가
             Divider(color= Color.Gray, thickness = 0.8.dp)
             Spacer(modifier = Modifier.height(20.dp))
             ExpandableCardSection()
-        }
     }
 }

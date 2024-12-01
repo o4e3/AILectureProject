@@ -20,28 +20,7 @@ import androidx.navigation.NavHostController
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserView(navController: NavHostController) {
-    Scaffold(
-        topBar = {
-            Column {
-                TopAppBar(
-                    modifier = Modifier.background(Color.White),
-                    title = { Text("홈") },
-                    navigationIcon = {
-                        IconButton(onClick = { /* Do Something */ }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
-                    }
-                )
-                Divider(
-                    color = Color.Gray, // Set the color of the border
-                    thickness = 0.5.dp   // Set the thickness of the border to be subtle
-                )
-            }
-        }
-    ) {
+fun UserScreen(navController: NavHostController) {
         Text("UserView")
-    }
 }
