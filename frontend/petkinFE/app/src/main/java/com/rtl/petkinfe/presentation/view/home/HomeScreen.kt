@@ -19,41 +19,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.rtl.petkinfe.AppNavigator
 import com.rtl.petkinfe.presentation.view.home.components.ExpandableCardSection
 import com.rtl.petkinfe.presentation.view.home.components.IconSection
 import com.rtl.petkinfe.presentation.view.home.components.TitleSection
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeView() {
-    Scaffold(
-        topBar = {
-            Column {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
-                    modifier = Modifier.background(Color.White),
-                    title = { Text("홈") },
-                    navigationIcon = {
-                        IconButton(onClick = { /* Do Something */ }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
-                    }
-                )
-                Divider(
-                    color = Color.Gray, // Set the color of the border
-                    thickness = 0.5.dp   // Set the thickness of the border to be subtle
-                )
-            }
-        },
-        bottomBar = { BottomNavigation(navController = rememberNavController()) }
-    ) {
-        Column(modifier = Modifier.padding(it)) {
+fun HomeScreen(navController: NavController) {
+        Column(modifier = Modifier.padding(16.dp)) {
             TitleSection()
             IconSection()
             ExpandableCardSection() // 확장 가능한 카드 섹션
         }
-    }
 }
