@@ -18,9 +18,9 @@ import androidx.core.view.WindowCompat
 
 private val LightColorPalette = lightColorScheme(
     primary = PhotoIconActiveColor, // 메인 버튼과 맞춤 설정된 컬러
-    secondary = BathIconActiveColor, // 부드러운 느낌의 보조 색상
+    secondary = Color.White, // 부드러운 느낌의 보조 색상
     background = Color.White, // 전체 배경 컬러
-    surface = MedicineSectionBackgroundColor, // 카드 및 표면용 컬러
+    surface = Color.White, // 카드 및 표면용 컬러
     onPrimary = Color.White, // primary 텍스트 색상
     onSecondary = Color.Black, // secondary 텍스트 색상
     onBackground = DefaultStrokeColor, // 배경 텍스트 색상

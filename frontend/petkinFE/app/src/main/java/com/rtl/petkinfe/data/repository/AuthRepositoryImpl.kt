@@ -22,7 +22,7 @@ class AuthRepositoryImpl(
             val tokenRequest = KakaoTokenRequest(oauthAccessToken)
             val response = authApi.sendKakaoToken(tokenRequest = tokenRequest)
             tokenDataSource.saveToken(response.accessToken, response.refreshToken)
-            Log.d("testt", "액세스 토큰: ${response.accessToken}, 리프레시 토큰: ${response.refreshToken}")
+            Log.d("testt", "액세스 토큰: ${response.accessToken}")
             true
         } catch (e: Exception) {
             Log.e("testt", "카카오 토큰 전송 중 예외 발생: ${e.message}", e)
