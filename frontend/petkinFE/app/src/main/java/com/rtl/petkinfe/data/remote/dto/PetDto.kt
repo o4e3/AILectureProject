@@ -7,13 +7,17 @@ data class PetRegisterRequestDto(
     val species: String,
     val breed: String,
     val age: Int,
-    val gender: String)
+    val gender: String
+)
 
 data class PetRegisterResponseDto(
     @SerializedName("pet_id")
     val petId: Long,
     val name: String,
     val species: String,
+    val breed: String,
+    val age: Int,
+    val gender: String,
     @SerializedName("registration_date")
     val registrationDate: String
 )
