@@ -3,6 +3,9 @@ package com.rtl.petkinfe.di
 import com.rtl.petkinfe.BuildConfig
 import com.rtl.petkinfe.data.local.TokenDataSource
 import com.rtl.petkinfe.data.remote.api.AuthApi
+import com.rtl.petkinfe.data.remote.api.HealthRecordApi
+import com.rtl.petkinfe.data.remote.api.PetApi
+import com.rtl.petkinfe.data.remote.api.PredictionApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -66,5 +69,23 @@ object NetworkModule {
     @Singleton
     fun provideAuthApi(retrofit: Retrofit): AuthApi {
         return retrofit.create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePetApi(retrofit: Retrofit): PetApi {
+        return retrofit.create(PetApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHealthRecordApi(retrofit: Retrofit): HealthRecordApi {
+        return retrofit.create(HealthRecordApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePredictionApi(retrofit: Retrofit): PredictionApi {
+        return retrofit.create(PredictionApi::class.java)
     }
 }

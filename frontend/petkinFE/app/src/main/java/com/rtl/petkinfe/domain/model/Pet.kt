@@ -8,7 +8,7 @@ data class Pet(
     val species: String,
     val breed: String,
     val age: Int,
-    val gender: Char,
-    val registerData: Date
+    val gender: String,
+    val registerDate: String?
 )
 

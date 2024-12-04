@@ -3,8 +3,11 @@ package com.rtl.petkinfe.domain.repository
 import com.rtl.petkinfe.domain.model.Pet
 
 interface PetRepository {
-    fun getMyPetList(): List<Pet>
-    fun registerPet(pet: Pet): Pet
-    fun deletePet(pet: Pet)
-    fun updatePet(pet: Pet)
+    suspend fun getMyPetList(): List<Pet>
+    suspend fun registerPet(pet: Pet): Pet
+    suspend fun deletePet(petId: Long)
+    suspend fun updatePet(pet: Pet)
+    suspend fun getPetById(petId: Long): Pet
+    suspend fun savePetId(petId: Long)
+    suspend fun getSavedPetId(): Long?
 }
