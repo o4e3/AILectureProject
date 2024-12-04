@@ -1,6 +1,6 @@
 import os
 import jwt
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import Depends, HTTPException, APIRouter, Body
 import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -9,6 +9,8 @@ from pydantic import BaseModel
 from petkinApp.database import get_db
 from petkinApp.models import Customers
 from fastapi.security import OAuth2PasswordBearer
+
+from petkinApp.schemas.customers import RefreshTokenRequest
 from petkinApp.security import decode_jwt_token  # Import from security.py
 
 # OAuth2PasswordBearer 설정
@@ -128,3 +130,46 @@ async def get_my_profile(token: dict = Depends(decode_jwt_token), db: Session = 
         "email": customer.email,
         "registration_date": customer.registration_date
     }
+
+@router.post("/token/refresh")
+async def refresh_token(
+    refresh_token_request: RefreshTokenRequest,  # 변경된 부분
+    db: Session = Depends(get_db)
+):
+    """
+    토큰 리프레시 API
+    """
+    # 요청에서 refreshToken 추출
+    refresh_token = refresh_token_request.refreshToken
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Refresh token이 제공되지 않았습니다.")
+
+    # Refresh token 검증
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        kakao_id = payload.get("sub")
+        token_type = payload.get("type")
+
+        if not kakao_id or token_type != "refresh":
+            raise HTTPException(status_code=400, detail="유효하지 않은 토큰 형식입니다.")
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token이 만료되었습니다.")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"유효하지 않은 토큰입니다: {str(e)}")
+
+    # DB에서 사용자 확인
+    customer = db.query(Customers).filter(Customers.customer_id == kakao_id).first()
+    if not customer or customer.refresh_token != refresh_token:
+        raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다.")
+
+    # 새로운 accessToken 및 refreshToken 생성
+    access_token = create_jwt_token({"sub": kakao_id, "nickname": customer.nickname})
+    new_refresh_token = create_jwt_token({"sub": kakao_id, "type": "refresh"}, timedelta(days=7))
+
+    # Refresh token 업데이트
+    customer.refresh_token = new_refresh_token
+    db.commit()
+
+    # 응답 반환
+    return {"accessToken": access_token, "refreshToken": new_refresh_token}
