@@ -1,26 +1,44 @@
 from fastapi import FastAPI
-from petkinApp import models
-from petkinApp.database import engine
-from petkinApp.routers import customers
-from petkinApp.routers import pets
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.openapi.utils import get_openapi
+from petkinApp.routers import customers, pets
 
+app = FastAPI(
+    title="Petkin API",
+    description="API for managing pet-related services",
+    version="1.0.0",
+)
 
-"""
-이 파일은 FastAPI 애플리케이션의 진입점, FastAPI 인스턴스를 생성 + 라우터 포함
-"""
+# 라우터 등록
+app.include_router(customers.router, prefix="/api", tags=["customers-controller"])
+app.include_router(pets.router, prefix="/api", tags=["pets-controller"])
+# OpenAPI 스키마 수정
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Petkin API",
+        version="1.0.0",
+        description="API documentation for Petkin",
+        routes=app.routes,
+    )
+    # BearerAuth 보안 설정
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+    openapi_schema["security"] = [{"BearerAuth": []}]
+    for path, methods in openapi_schema["paths"].items():
+        for method, details in methods.items():
+            if "parameters" in details:
+                # Authorization 쿼리 파라미터 제거
+                details["parameters"] = [
+                    param for param in details["parameters"]
+                    if param.get("name") != "authorization"
+                ]
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
 
-app = FastAPI()  # FastAPI 애플리케이션 인스턴스 생성
-
-
-# 이는 애플리케이션 시작 시 데이터베이스 스키마를 초기화하는 데 사용됩니다.
-models.Base.metadata.create_all(bind=engine)
-
-# OAuth2PasswordBearer 설정
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/customers/oauth/login/KAKAO")
-
-# TODO 여기에 이런 식으로 라우터 포함 시키기
-# app.include_router(todos.router, prefix='/api', tags=["todos-controller"])
-app.include_router(customers.router, prefix='/api', tags=["customers-controller"])
-app.include_router(pets.router, prefix='/api', tags=["pets-controller"])
-app.include_router(pets.router, prefix='/api', tags=["health-records-controller"])
+app.openapi = custom_openapi

@@ -107,6 +107,13 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     kapt(libs.hilt.compiler) // Hilt 컴파일러
     implementation(libs.androidx.datastore.preferences)
+    implementation("com.google.accompanist:accompanist-pager:0.30.1")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.30.1")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-gif:2.4.0")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
 }
 
 // local.properties 파일에서 API_BASE_URL 읽어오는 함수

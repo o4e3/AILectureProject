@@ -1,8 +1,10 @@
 package com.rtl.petkinfe.presentation.view.login
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +31,7 @@ import com.rtl.petkinfe.navigation.PetkinScreens
 import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val viewModel: LoginViewModel = hiltViewModel()
@@ -39,8 +42,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .padding(it)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(SplashBackgroundColor) // Set background color
+                .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -51,7 +55,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-
             )
 
             Spacer(modifier = Modifier.height(16.dp)) // 아이콘과 버튼 사이의 간격
