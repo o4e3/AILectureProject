@@ -5,6 +5,7 @@ from petkinApp.models import Pets, Customers
 from datetime import datetime
 from petkinApp.schemas.pets import PetRegisterRequest, PetRegisterResponse, PetDetailResponse, PetUpdateRequest
 from petkinApp.security import decode_jwt_token
+from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/pets", tags=["pets-controller"])
 @router.post("/", response_model=PetRegisterResponse, status_code=status.HTTP_201_CREATED)
@@ -50,6 +51,33 @@ async def register_pet(
         gender=new_pet.gender,
         registration_date=new_pet.registration_date
     )
+
+@router.get("/mine", response_model=list[PetDetailResponse], status_code=status.HTTP_200_OK)
+async def get_my_pets(
+    token: dict = Depends(decode_jwt_token),
+    db: Session = Depends(get_db)
+):
+    owner_id = token.get("sub")
+    if not owner_id:
+        raise HTTPException(status_code=401, detail="유효하지 않은 인증 정보입니다.")
+
+    pets = db.query(Pets).filter(Pets.owner_id == owner_id).all()
+
+    for pet in pets:
+        print(f"Pet Data: {pet.pet_id}, {pet.name}, {pet.species}, {pet.gender}, {pet.registration_date}")
+
+    return [
+        PetDetailResponse(
+            pet_id=pet.pet_id,
+            name=pet.name,
+            species=pet.species,
+            breed=pet.breed,
+            age=pet.age,
+            gender=pet.gender,
+            registration_date=pet.registration_date
+        )
+        for pet in pets
+    ]
 
 
 @router.get("/{pet_id}", response_model=PetDetailResponse, status_code=status.HTTP_200_OK)
@@ -149,3 +177,5 @@ async def delete_pet(
 
     # 성공 메시지 반환
     return {"message": "Pet successfully deleted"}
+
+
