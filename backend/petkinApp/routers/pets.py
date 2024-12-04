@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from petkinApp.database import get_db
 from petkinApp.models import Pets, Customers
 from datetime import datetime
-from petkinApp.schemas.pets import PetRegisterRequest, PetRegisterResponse
+from petkinApp.schemas.pets import PetRegisterRequest, PetRegisterResponse, PetDetailResponse
 from petkinApp.security import decode_jwt_token
 
 router = APIRouter(prefix="/pets", tags=["pets-controller"])
@@ -49,4 +49,35 @@ async def register_pet(
         age=new_pet.age,
         gender=new_pet.gender,
         registration_date=new_pet.registration_date
+    )
+
+
+@router.get("/{pet_id}", response_model=PetDetailResponse, status_code=status.HTTP_200_OK)
+async def get_pet(
+    pet_id: int,
+    token: dict = Depends(decode_jwt_token),  # JWT 토큰 디코딩
+    db: Session = Depends(get_db)
+):
+    """
+    펫 정보 조회 API
+    """
+    # JWT에서 사용자 ID 추출
+    owner_id = token.get("sub")
+    if not owner_id:
+        raise HTTPException(status_code=401, detail="유효하지 않은 인증 정보입니다.")
+
+    # DB에서 pet_id와 owner_id로 반려동물 조회
+    pet = db.query(Pets).filter(Pets.pet_id == pet_id, Pets.owner_id == owner_id).first()
+    if not pet:
+        raise HTTPException(status_code=404, detail="Pet not found")
+
+    # 응답 반환
+    return PetDetailResponse(
+        pet_id=pet.pet_id,
+        name=pet.name,
+        species=pet.species,
+        breed=pet.breed,
+        age=pet.age,
+        gender=pet.gender,
+        registration_date=pet.registration_date
     )

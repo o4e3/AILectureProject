@@ -16,3 +16,12 @@ class PetRegisterResponse(BaseModel):
     age: int
     gender: str
     registration_date: datetime
+
+class PetDetailResponse(BaseModel):
+    pet_id: int
+    name: str
+    species: str
+    breed: str
+    age: int
+    gender: str
+    registration_date: datetime
