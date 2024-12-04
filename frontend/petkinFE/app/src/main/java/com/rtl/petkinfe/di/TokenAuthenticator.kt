@@ -30,26 +30,37 @@ class TokenAuthenticator @Inject constructor(
         }
 
         return runBlocking {
-            val refreshToken = dataSource.getRefreshToken() ?: return@runBlocking null
-
-            try {
-                val tokenResponse = tokenApiProvider.get().refreshToken(TokenRefreshRequest(refreshToken.toString()))
-                    if (tokenResponse != null) {
-                        dataSource.saveToken(
-                            tokenResponse.accessToken,
-                            tokenResponse.refreshToken
-                        )
-
-                        // 새로운 토큰으로 요청 재시도
-                        response.request.newBuilder()
-                            .header("Authorization", "Bearer ${tokenResponse.accessToken}")
-                            .header("Retry-With-New-Token", "true")
-                            .build()
-                    } else {
-                        null
-                }
+            val refreshToken = try {
+                dataSource.getRefreshTokenImmediately() // 즉시 값 가져오기
             } catch (e: Exception) {
                 null
+            }
+
+
+            if (refreshToken.isNullOrEmpty()) {
+                // 리프레시 토큰이 없으면 null 반환
+                null
+            } else {
+                try {
+                    val tokenResponse = tokenApiProvider.get().refreshToken(
+                        TokenRefreshRequest(refreshToken)
+                    )
+
+                    // 토큰 저장
+                    dataSource.saveToken(
+                        tokenResponse.accessToken,
+                        tokenResponse.refreshToken
+                    )
+
+                    // 새로운 요청 빌드
+                    response.request.newBuilder()
+                        .header("Authorization", "Bearer ${tokenResponse.accessToken}")
+                        .header("Retry-With-New-Token", "true") // 재시도 방지 헤더 추가
+                        .build()
+                } catch (e: Exception) {
+                    // 예외 처리
+                    null
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.rtl.petkinfe.data.remote.api
 
-import com.rtl.petkinfe.data.remote.dto.MyPetsResponseDto
 import com.rtl.petkinfe.data.remote.dto.PetRegisterRequestDto
 import com.rtl.petkinfe.data.remote.dto.PetRegisterResponseDto
 import com.rtl.petkinfe.data.remote.dto.PetResponseDto
@@ -35,5 +34,5 @@ interface PetApi {
     )
 
     @GET("api/pets/mine")
-    suspend fun getMyPets() : MyPetsResponseDto
+    suspend fun getMyPets() : List<PetResponseDto>
 }

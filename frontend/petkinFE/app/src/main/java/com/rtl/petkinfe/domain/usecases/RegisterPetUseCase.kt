@@ -15,18 +15,19 @@ class RegisterPetUseCase @Inject constructor(
         petBreed: String
     ): Pet {
         // 성별 매핑
-        val mappedGender = when (petGender) {
-            "수컷" -> "M"
-            "암컷" -> "F"
-            "중성화 수컷" -> "M"
-            "중성화 암컷" -> "F"
-            else -> throw IllegalArgumentException("Invalid gender selected.")
+        // petGender에서 공백제거해야함
+        val mappedGender = when (petGender.trim())
+        {
+            "수컷", "중성화 수컷" -> "M"
+            "암컷", "중성화 암컷" -> "F"
+            else -> throw IllegalArgumentException("Invalid gender selected: $petGender")
         }
+
 
         // 종 매핑
         val mappedSpecies = when (petSpecies) {
-            "강아지" -> "Dog"
-            "고양이" -> "Cat"
+            "강아지" -> "dog"
+            "고양이" -> "cat"
             else -> throw IllegalArgumentException("Invalid species selected.")
         }
 
