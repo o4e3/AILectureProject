@@ -10,16 +10,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides
+    @Singleton
     fun provideTokenDataSource(@ApplicationContext context: Context): TokenDataSource {
-        return TokenDataSource(context)
+        return TokenDataSource.getInstance(context)
     }
-
 
     @Provides
     fun provideAutoLoginUseCase(authRepository: AuthRepository): AutoLoginUseCase {

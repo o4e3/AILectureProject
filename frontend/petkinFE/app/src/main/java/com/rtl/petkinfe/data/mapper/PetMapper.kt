@@ -36,10 +36,10 @@ fun MyPetsResponseDto.toDomainModel(): List<Pet> {
 
 fun Pet.toPetRegisterRequestDto(): PetRegisterRequestDto {
     return PetRegisterRequestDto(
-        name = name,
-        species = species,
-        breed = breed,
-        age = age,
+        name = name.take(255), // name은 최대 255자
+        species = species.lowercase(), // "Dog" -> "dog"
+        breed = breed.take(255), // breed는 최대 255자
+        age = age.coerceAtLeast(0), // age는 0 이상
         gender = gender
     );
 }

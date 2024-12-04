@@ -90,5 +90,32 @@ class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun getOrRefreshAccessToken(): String? {
+        val accessToken = getAccessToken()
+        if (accessToken.isNullOrEmpty()) return null
+
+        return try {
+            // 토큰을 사용하는 테스트 API 호출
+            authApi.getUserProfile() // 프로필 API를 호출하여 유효성을 간접 확인
+            accessToken
+        } catch (e: retrofit2.HttpException) {
+            if (e.code() == 401) {
+                Log.d("AuthRepositoryImpl", "Access token expired. Refreshing token.")
+                val refreshToken = getRefreshToken()
+                if (!refreshToken.isNullOrEmpty() && refreshToken(refreshToken)) {
+                    getAccessToken() // 새로 발급된 토큰 반환
+                } else {
+                    null
+                }
+            } else {
+                Log.e("AuthRepositoryImpl", "API call failed: ${e.message()}")
+                null
+            }
+        }
+    }
+
+
+
+
 
 }
