@@ -28,3 +28,15 @@ class Customers(Base):
     refresh_token = Column(String(255), nullable=True)
     auth_provider = Column(String(255), nullable=True)
     registration_date = Column(DateTime, default=datetime.utcnow, nullable=True)
+
+
+class Pets(Base):
+    __tablename__ = 'pets'
+    pet_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    species = Column(String(50), nullable=False)  # dog, cat
+    breed = Column(String(255), nullable=False)
+    age = Column(Integer, nullable=False)
+    gender = Column(String(10), nullable=False)  # M, F
+    registration_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+    owner_id = Column(BigInteger, ForeignKey('Customers.customer_id'), nullable=False)
