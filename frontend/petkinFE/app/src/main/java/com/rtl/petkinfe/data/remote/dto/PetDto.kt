@@ -33,7 +33,3 @@ data class PetResponseDto(
     @SerializedName("registration_date")
     val registrationDate: String
 )
-
-data class MyPetsResponseDto(
-    val pets: List<PetResponseDto>
-)

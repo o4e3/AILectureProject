@@ -6,6 +6,7 @@ import com.rtl.petkinfe.domain.model.UserProfile
 fun UserProfileResponse.toDomain(): UserProfile {
     return UserProfile(
         id = id,
-        nickname = nickname
+        nickname = nickname,
+        email = email
     )
 }

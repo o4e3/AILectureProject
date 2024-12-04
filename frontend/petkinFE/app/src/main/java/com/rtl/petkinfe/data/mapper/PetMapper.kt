@@ -1,6 +1,5 @@
 package com.rtl.petkinfe.data.mapper
 
-import com.rtl.petkinfe.data.remote.dto.MyPetsResponseDto
 import com.rtl.petkinfe.data.remote.dto.PetRegisterRequestDto
 import com.rtl.petkinfe.data.remote.dto.PetRegisterResponseDto
 import com.rtl.petkinfe.data.remote.dto.PetResponseDto
@@ -30,8 +29,18 @@ fun PetResponseDto.toDomainModel(): Pet {
     )
 }
 
-fun MyPetsResponseDto.toDomainModel(): List<Pet> {
-    return pets.map { it.toDomainModel() }
+fun List<PetResponseDto>.toDomainModel(): List<Pet> {
+    return this.map { dto ->
+        Pet(
+            id = dto.petId,
+            name = dto.name,
+            species = dto.species,
+            breed = dto.breed,
+            age = dto.age,
+            gender = dto.gender,
+            registerDate = dto.registrationDate
+        )
+    }
 }
 
 fun Pet.toPetRegisterRequestDto(): PetRegisterRequestDto {
