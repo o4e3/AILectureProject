@@ -122,3 +122,30 @@ async def update_pet(
         gender=pet.gender,
         registration_date=pet.registration_date
     )
+
+
+@router.delete("/{pet_id}", status_code=status.HTTP_200_OK)
+async def delete_pet(
+    pet_id: int,
+    token: dict = Depends(decode_jwt_token),  # JWT 토큰 디코딩
+    db: Session = Depends(get_db)
+):
+    """
+    반려동물 삭제 API
+    """
+    # JWT에서 사용자 ID 추출
+    owner_id = token.get("sub")
+    if not owner_id:
+        raise HTTPException(status_code=401, detail="유효하지 않은 인증 정보입니다.")
+
+    # DB에서 pet_id와 owner_id로 반려동물 조회
+    pet = db.query(Pets).filter(Pets.pet_id == pet_id, Pets.owner_id == owner_id).first()
+    if not pet:
+        raise HTTPException(status_code=404, detail="Pet not found")
+
+    # 반려동물 삭제
+    db.delete(pet)
+    db.commit()
+
+    # 성공 메시지 반환
+    return {"message": "Pet successfully deleted"}
