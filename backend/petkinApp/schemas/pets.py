@@ -25,3 +25,10 @@ class PetDetailResponse(BaseModel):
     age: int
     gender: str
     registration_date: datetime
+
+class PetUpdateRequest(BaseModel):
+    name: str = Field(..., max_length=255)
+    species: str = Field(..., regex="^(dog|cat)$")
+    breed: str = Field(..., max_length=255)
+    age: int = Field(..., ge=0)  # 나이는 0 이상
+    gender: str = Field(..., regex="^(M|F)$")
