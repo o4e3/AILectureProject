@@ -17,24 +17,27 @@ import androidx.navigation.compose.rememberNavController
 import com.rtl.petkinfe.presentation.view.calendar.CalendarScreen
 import com.rtl.petkinfe.presentation.view.home.HomeScreen
 import com.rtl.petkinfe.presentation.view.login.LoginScreen
+import com.rtl.petkinfe.presentation.view.pet.OnboardingScreen
+import com.rtl.petkinfe.presentation.view.pet.PetRegistrationScreen
 import com.rtl.petkinfe.presentation.view.user.UserScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PetkinNavigation() {
+fun PetkinNavigation(startDestination: String) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         bottomBar = {
-            if (currentRoute != PetkinScreens.LoginScreen.name) {
+            // 로그인 화면과 펫 등록 화면에서만 BottomNavigation을 숨기기 위해 && 조건 사용
+            if (currentRoute != PetkinScreens.LoginScreen.name && currentRoute != PetkinScreens.PetRegistrationScreen.name && currentRoute != PetkinScreens.OnboardingScreen.name) {
                 BottomNavigation(navController = navController)
             }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = PetkinScreens.LoginScreen.name,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             // 로그인 화면
@@ -46,9 +49,17 @@ fun PetkinNavigation() {
                     }
                 })
             }
+            // 온 보딩 화면
+            composable(PetkinScreens.OnboardingScreen.name) {
+                OnboardingScreen(navController)
+            }
             // 홈 화면
             composable(PetkinScreens.HomeScreen.name) {
                 HomeScreen(navController)
+            }
+            // 펫 등록 화면
+            composable(PetkinScreens.PetRegistrationScreen.name) {
+                PetRegistrationScreen(navController)  // 펫이 없으면 펫 등록 화면으로 이동
             }
             // 캘린더 화면
             composable(PetkinScreens.CalendarScreen.name) {

@@ -3,7 +3,8 @@ package com.rtl.petkinfe.navigation
 enum class PetkinScreens {
     LoginScreen,
     HomeScreen,
-    PetRegisterScreen,
+    PetRegistrationScreen,
     CalendarScreen,
-    MyPageScreen
+    MyPageScreen,
+    OnboardingScreen
 }

@@ -6,8 +6,9 @@ import com.rtl.petkinfe.data.mapper.toPetRegisterRequestDto
 import com.rtl.petkinfe.data.remote.api.PetApi
 import com.rtl.petkinfe.domain.model.Pet
 import com.rtl.petkinfe.domain.repository.PetRepository
+import javax.inject.Inject
 
-class PetRepositoryImpl(
+class PetRepositoryImpl @Inject constructor(
     private val petApi: PetApi,
     private val sharedPrefManager: SharedPrefManager
 ): PetRepository {
