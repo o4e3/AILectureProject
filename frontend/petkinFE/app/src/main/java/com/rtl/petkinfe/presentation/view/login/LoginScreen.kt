@@ -1,8 +1,10 @@
 package com.rtl.petkinfe.presentation.view.login
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,15 +25,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.rtl.petkinfe.AppNavigator
+import androidx.navigation.NavController
 import com.rtl.petkinfe.R
+import com.rtl.petkinfe.navigation.PetkinScreens
 import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
-import dagger.hilt.android.AndroidEntryPoint
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onLoginSuccess: () -> Unit) {
     val viewModel: LoginViewModel = hiltViewModel()
     val context = LocalContext.current
     val loginState by viewModel.loginState.collectAsState()
@@ -40,8 +42,9 @@ fun LoginScreen() {
     ) {
         Column(
             modifier = Modifier
-                .padding(it)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(SplashBackgroundColor) // Set background color
+                .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -52,7 +55,6 @@ fun LoginScreen() {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-
             )
 
             Spacer(modifier = Modifier.height(16.dp)) // 아이콘과 버튼 사이의 간격
@@ -71,14 +73,9 @@ fun LoginScreen() {
         }
     }
 
-    // 로그인 상태 처리
     when (loginState) {
         is LoginViewModel.LoginState.Success -> {
-            val token = (loginState as LoginViewModel.LoginState.Success).token
-            Log.d("LoginView", "로그인 성공! 토큰: $token")
-
-            // 로그인 성공 시 메인 화면으로 이동
-            (context as AppNavigator).navigateToHome()
+            onLoginSuccess()
         }
         is LoginViewModel.LoginState.Failure -> {
             Toast.makeText(context, "로그인 실패", Toast.LENGTH_SHORT).show()

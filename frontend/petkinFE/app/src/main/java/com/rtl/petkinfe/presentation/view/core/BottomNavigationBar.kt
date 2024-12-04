@@ -1,7 +1,9 @@
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.rtl.petkinfe.R
+import com.rtl.petkinfe.navigation.PetkinScreens
 
 @Composable
 fun BottomNavigation(navController: NavHostController) {
@@ -23,38 +26,45 @@ fun BottomNavigation(navController: NavHostController) {
         BottomNavItem.User
     )
 
-    NavigationBar(containerColor = Color.White, contentColor = Color.Gray) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+    // 네비게이션 상태 추적
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
+    NavigationBar(containerColor = Color(0xffFAFAFA), contentColor = Color.Gray) {
         items.forEach { item ->
             NavigationBarItem(
                 icon = {
                     Icon(
                         painter = painterResource(id = item.icon),
                         contentDescription = stringResource(id = item.title),
-                        modifier = Modifier
-                            .size(24.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 label = { Text(stringResource(id = item.title), fontSize = 10.sp) },
                 selected = currentRoute == item.screenRoute,
                 onClick = {
-                    navController.navigate(item.screenRoute) {
-                        navController.graph.startDestinationRoute?.let { route ->
-                            popUpTo(route) { saveState = true }
+                    // 현재 화면과 다른 경우에만 이동
+                    if (currentRoute != item.screenRoute) {
+                        navController.navigate(item.screenRoute) {
+                            popUpTo(navController.graph.startDestinationRoute!!) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
-                }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color(0xffFF9626),
+                    indicatorColor = Color(0xffFFEECB),
+                )
             )
         }
     }
 }
 
+
+
 sealed class BottomNavItem(val title: Int, val icon: Int, val screenRoute: String) {
-    object Calendar : BottomNavItem(R.string.text_calendar, R.drawable.ic_calendar, "calendar")
-    object Home : BottomNavItem(R.string.text_home, R.drawable.ic_home, "home")
-    object User : BottomNavItem(R.string.text_user, R.drawable.ic_user, "user")
+    object Calendar : BottomNavItem(R.string.text_calendar, R.drawable.ic_calendar, PetkinScreens.CalendarScreen.name)
+    object Home : BottomNavItem(R.string.text_home, R.drawable.ic_home, PetkinScreens.HomeScreen.name)
+    object User : BottomNavItem(R.string.text_user, R.drawable.ic_user, PetkinScreens.MyPageScreen.name)
 }
