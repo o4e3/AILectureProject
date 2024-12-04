@@ -8,6 +8,6 @@ class DeletePetUseCase @Inject constructor(
     private val petRepository: PetRepository
 ) {
     suspend operator fun invoke(pet: Pet){
-        return petRepository.deletePet(pet)
+        return petRepository.deletePet(pet.id!!)
     }
 }
