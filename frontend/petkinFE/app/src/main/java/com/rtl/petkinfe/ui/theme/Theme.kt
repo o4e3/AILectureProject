@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val LightColorPalette = lightColorScheme(
     primary = PhotoIconActiveColor, // 메인 버튼과 맞춤 설정된 컬러
@@ -43,6 +44,14 @@ fun PetkinFETheme(
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
+
+    val systemUiController = rememberSystemUiController()
+
+    // 상태바를 흰색으로 설정하고 아이콘을 어둡게
+    systemUiController.setStatusBarColor(
+        color = Color.White,
+        darkIcons = true // 흰색 배경에 어울리는 어두운 아이콘
+    )
 
     MaterialTheme(
         colorScheme = colorScheme,

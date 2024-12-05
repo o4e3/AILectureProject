@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.rtl.petkinfe.domain.model.HealthRecord
+import com.rtl.petkinfe.domain.model.ItemType
 import com.rtl.petkinfe.presentation.view.home.ExpandableCardSection
 import com.rtl.petkinfe.presentation.view.home.TitleSection
 
@@ -46,7 +48,9 @@ fun CalendarScreen(navController: NavHostController) {
             CalendarContent() // 캘린더 뷰 추가
             Divider(color= Color.Gray, thickness = 0.8.dp)
             Spacer(modifier = Modifier.height(20.dp))
-            ExpandableCardSection()
+            ExpandableCardSection(listOf(
+                HealthRecord(6, ItemType.BATH, "밥 먹"),
+            ))
         }
     }
 }

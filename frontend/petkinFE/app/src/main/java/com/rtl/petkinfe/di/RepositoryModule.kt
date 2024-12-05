@@ -26,6 +26,6 @@ abstract class RepositoryModule {
     abstract fun bindPetRepository(petRepositoryImpl: PetRepositoryImpl): PetRepository
 
     @Binds
-    abstract fun bindHealthRecordRepository(healthRecordRepository: HealthRecordRepositoryImpl): HealthRecordRepository
+    abstract fun bindHealthRecordRepository(healthRecordRepositoryImpl: HealthRecordRepositoryImpl): HealthRecordRepository
 }
 

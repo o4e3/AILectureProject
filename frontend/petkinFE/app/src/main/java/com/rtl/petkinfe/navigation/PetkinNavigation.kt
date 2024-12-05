@@ -10,10 +10,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.rtl.petkinfe.presentation.view.calendar.CalendarScreen
 import com.rtl.petkinfe.presentation.view.home.HomeScreen
 import com.rtl.petkinfe.presentation.view.login.LoginScreen
@@ -26,6 +28,14 @@ fun PetkinNavigation(startDestination: String) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val systemUiController = rememberSystemUiController()
+
+    // 상태바 색상 변경
+    systemUiController.setStatusBarColor(
+        color = Color.White,  // 상태바 색상을 흰색으로 설정
+        darkIcons = true      // 흰색 배경에 어울리는 어두운 아이콘
+    )
 
     Scaffold(
         bottomBar = {
