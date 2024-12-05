@@ -11,6 +11,7 @@ app = FastAPI(
 # 라우터 등록
 app.include_router(customers.router, prefix="/api", tags=["customers-controller"])
 app.include_router(pets.router, prefix="/api", tags=["pets-controller"])
+
 # OpenAPI 스키마 수정
 def custom_openapi():
     if app.openapi_schema:
@@ -32,6 +33,10 @@ def custom_openapi():
     openapi_schema["security"] = [{"BearerAuth": []}]
     for path, methods in openapi_schema["paths"].items():
         for method, details in methods.items():
+            if path == "/api/customers/oauth/login/KAKAO":  # 로그인 엔드포인트 경로
+                for method in methods.values():
+                    if "security" in method:
+                        del method["security"]
             if "parameters" in details:
                 # Authorization 쿼리 파라미터 제거
                 details["parameters"] = [

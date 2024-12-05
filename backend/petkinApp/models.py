@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, Text
 from petkinApp.database import Base
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, ForeignKey
 
@@ -18,7 +18,13 @@ DB 테이블과 동일하게 만들기 (확인하면 삭졔)
 #     complete = Column(Boolean, default=False)
 #     owner_id = Column(Integer, default=1234)
 
-
+class HealthRecord(Base):
+    __tablename__ = 'HealthRecord'
+    record_id = Column(BigInteger, primary_key=True)
+    pet_id = Column(BigInteger, nullable=False)
+    item_id = Column(Integer, nullable=False)
+    memo = Column(Text, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=True)
 
 class Customers(Base):
     __tablename__ = 'Customers'  # MySQL 테이블 이름
