@@ -5,7 +5,7 @@ import com.rtl.petkinfe.domain.model.ItemType
 
 interface HealthRecordRepository {
     // 오늘의 전체 건강 기록 반환
-    fun getTodayHealthRecord(): List<HealthRecord>
+    suspend fun getTodayHealthRecord(): List<HealthRecord>
 
     // 특정 기록 ID로 상세 정보 반환
     fun getRecordInfo(recordId: Long): HealthRecord

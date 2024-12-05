@@ -19,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.rtl.petkinfe.presentation.view.core.widgets.ExpandableCardSection
+import com.rtl.petkinfe.domain.model.HealthRecord
+import com.rtl.petkinfe.domain.model.ItemType
+import com.rtl.petkinfe.presentation.view.home.ExpandableCardSection
 import com.rtl.petkinfe.presentation.view.home.TitleSection
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -37,14 +39,18 @@ fun CalendarScreen(navController: NavHostController) {
                 }
             )
         }
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    ) {paddingValues ->
+        Column(modifier = Modifier
+            .padding(paddingValues)
+            .padding(horizontal = 12.dp)) {
             // 날짜 섹션과 캘린더 섹션을 추가
             TitleSection() // 날짜를 표시하는 섹션
             CalendarContent() // 캘린더 뷰 추가
             Divider(color= Color.Gray, thickness = 0.8.dp)
             Spacer(modifier = Modifier.height(20.dp))
-            ExpandableCardSection()
+            ExpandableCardSection(listOf(
+                HealthRecord(6, ItemType.BATH, "밥 먹"),
+            ))
         }
     }
 }
