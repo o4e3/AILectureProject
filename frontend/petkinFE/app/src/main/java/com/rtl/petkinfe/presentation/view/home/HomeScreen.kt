@@ -40,6 +40,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.rtl.petkinfe.R
 import com.rtl.petkinfe.presentation.view.home.model.IconUIModel
+import com.rtl.petkinfe.utils.formatDate
+import com.rtl.petkinfe.utils.formatinHome
 //import com.rtl.petkinfe.presentation.view.core.widgets.ExpandableCardSection
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -59,8 +61,12 @@ fun HomeScreen(navController: NavController) {
                 }
             )
         }
-    ){
-        Column(modifier = Modifier.padding(16.dp)) {
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(12.dp)
+        ) {
             TitleSection()
             IconSection()
             Spacer(modifier = Modifier.height(16.dp))
@@ -84,15 +90,14 @@ fun HomeScreenPreview() {
 fun TitleSection() {
     // 오늘 날짜 가져오기
     val localDateTime: LocalDateTime = LocalDateTime.now()
-    val currentDate: LocalDate = LocalDate.now()
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(bottom = 6.dp, start = 6.dp)
     ) {
         Text(
-            "${currentDate.dayOfMonth}월 ${currentDate.dayOfMonth}일",
+            formatinHome(localDateTime.toString()),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = Color.Black

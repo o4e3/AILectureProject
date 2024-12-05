@@ -14,5 +14,6 @@ enum class ItemType {
     SNACK,        // 간식
     MEDICINE,     // 약
     VACCINATION,  // 접종
-    HOSPITAL      // 병원
+    HOSPITAL,      // 병원
+    MEMO
 }
