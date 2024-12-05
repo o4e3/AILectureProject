@@ -76,6 +76,10 @@ def create_jwt_token(data: dict, expires_delta: timedelta = timedelta(minutes=30
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
 
+    # sub 값을 문자열로 변환
+    if "sub" in to_encode:
+        to_encode["sub"] = str(to_encode["sub"])
+
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
