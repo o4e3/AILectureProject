@@ -1,6 +1,7 @@
 package com.rtl.petkinfe
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,24 +38,27 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun checkLoginStatus() {
-        val token = authRepository.getAccessToken().toString()
+        val token = authRepository.getOrRefreshAccessToken()
         if (token.isNullOrEmpty()) {
             _isLoggedIn.value = false
             _isReady.value = true
-        } else {
-            UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
-                _isLoggedIn.value = error == null && tokenInfo != null
-                _isReady.value = true
-            }
-
-            // 로그인 후 펫 등록 여부 체크
-            checkPetRegistration()
+            return
         }
+
+        UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
+            _isLoggedIn.value = error == null && tokenInfo != null
+            _isReady.value = true
+        }
+
+        // 로그인 후 펫 등록 여부 체크
+        checkPetRegistration()
     }
+
 
     private suspend fun checkPetRegistration() {
         try {
             val pet = getMyPetsUseCase.invoke() // 펫 정보 확인
+            Log.d("Petkin", "Pet ID: ${pet.id}")
             _petRegistered.value = pet.id != null
         } catch (e: Exception) {
             _petRegistered.value = false

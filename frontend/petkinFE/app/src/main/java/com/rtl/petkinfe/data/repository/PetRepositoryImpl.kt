@@ -1,5 +1,6 @@
 package com.rtl.petkinfe.data.repository
 
+import android.util.Log
 import com.rtl.petkinfe.data.local.SharedPrefManager
 import com.rtl.petkinfe.data.mapper.toDomainModel
 import com.rtl.petkinfe.data.mapper.toPetRegisterRequestDto
@@ -13,7 +14,15 @@ class PetRepositoryImpl @Inject constructor(
     private val sharedPrefManager: SharedPrefManager
 ): PetRepository {
     override suspend fun getMyPetList(): List<Pet> {
-        return petApi.getMyPets().toDomainModel()
+        Log.d("펫등록", "getMyPetList 호출")
+        return try {
+            val response = petApi.getMyPets().toDomainModel()
+            Log.d("펫등록", response.toString())
+            response
+        } catch (e: Exception) {
+            Log.e("펫등록", "getMyPetList 예외 발생: ${e.message}", e)
+            emptyList() // 기본값 반환
+        }
     }
     override suspend fun savePetId(id: Long) = sharedPrefManager.savePetId(id)
     override suspend fun deletePet(id: Long) = petApi.deletePet(id)

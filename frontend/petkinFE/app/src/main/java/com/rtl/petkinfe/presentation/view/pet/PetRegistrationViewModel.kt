@@ -50,17 +50,22 @@ class PetRegistrationViewModel @Inject constructor(
         _petBreed.value = breed
     }
 
-    // 등록 버튼 클릭 시 처리할 로직 (예시로 로그를 찍는 작업)
-    fun registerPet() {
+    // 펫 등록 함수
+    fun registerPet(onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            registerPetUseCase.invoke(
-                petName = petName.value,
-                petAge = petAge.value.toInt(),
-                petGender = petGender.value,
-                petSpecies = petSpecies.value,
-                petBreed = petBreed.value
-            )
+            try {
+                registerPetUseCase.invoke(
+                    petName = petName.value,
+                    petAge = petAge.value.toIntOrNull()
+                        ?: throw IllegalArgumentException("Invalid age input"),
+                    petGender = petGender.value,
+                    petSpecies = petSpecies.value,
+                    petBreed = petBreed.value
+                )
+                onSuccess() // 성공 시 호출
+            } catch (e: Exception) {
+                onError(e.message ?: "등록 중 알 수 없는 오류가 발생했습니다.") // 실패 시 호출
+            }
         }
-        println("반려동물 등록: 이름 - $petName, 나이 - $petAge, 성별 - $petGender, 종 - $petSpecies, 품종 - $petBreed")
     }
 }

@@ -10,4 +10,5 @@ interface AuthRepository {
     suspend fun getRefreshToken(): String?
     suspend fun isLoggedIn(): Boolean
     suspend fun clearLoginState()
+    suspend fun getOrRefreshAccessToken(): String?
 }
