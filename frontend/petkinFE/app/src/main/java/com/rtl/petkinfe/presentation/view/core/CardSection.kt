@@ -1,6 +1,10 @@
 package com.rtl.petkinfe.presentation.view.core
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,10 +30,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.rtl.petkinfe.R
 import com.rtl.petkinfe.presentation.view.home.CardState
 import com.rtl.petkinfe.ui.theme.PhotoIconActiveColor
@@ -40,12 +46,12 @@ fun CardContent(
     title: String,
     isPhotoUploaded: Boolean,
     memo: String?,
-    onPhotoUpload: () -> Unit
+    onPhotoUpload: (Uri) -> Unit,
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
         when (title) {
             "피부 질환 검사" -> {
-                SkinCheckCardContent(isPhotoUploaded, onPhotoUpload)
+                SkinCheckCardContent(isPhotoUploaded, onPhotoUpload, null)
             }
             else -> {
                 GeneralCardContent(memo)
@@ -54,60 +60,58 @@ fun CardContent(
     }
 }
 
+
 @Composable
 fun SkinCheckCardContent(
     isPhotoUploaded: Boolean,
-    onPhotoUpload: () -> Unit
+    onPhotoUpload: (Uri) -> Unit, // 선택된 사진 URI를 전달
+    selectedPhotoUri: Uri? // 선택된 사진 URI
 ) {
-    if (isPhotoUploaded) {
-        PhotoUploadedContent(onPhotoUpload)
+    if (selectedPhotoUri != null) {
+        PhotoDisplayedContent(selectedPhotoUri, onPhotoUpload)
     } else {
         PhotoNotUploadedContent(onPhotoUpload)
     }
 }
 
 @Composable
-fun PhotoNotUploadedContent(onPhotoUpload: () -> Unit) {
+fun PhotoNotUploadedContent(onPhotoUpload: (Uri) -> Unit) {
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            onPhotoUpload(uri) // 선택된 사진 URI 전달
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "사진이 없습니다",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.Black,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        Text("사진이 없습니다", style = MaterialTheme.typography.bodyMedium)
+        Spacer(modifier = Modifier.height(8.dp))
         UploadCameraButton(
-            onClick = onPhotoUpload,
+            onClick = { photoPickerLauncher.launch("image/*") },
+            buttonText = "사진 등록"
         )
     }
 }
 
 @Composable
-fun PhotoUploadedContent(onPhotoUpload: () -> Unit) {
-    Text(
-        text = "사진이 등록되었습니다.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = Color.Black,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-    TextButton(
-        onClick = { /* TODO: 피부 질환 검사 로직 */ },
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = Color.Gray,
-                shape = RoundedCornerShape(24.dp)
-            )
-            .padding(vertical = 12.dp),
-        enabled = true // 버튼 활성화
+fun PhotoDisplayedContent(photoUri: Uri, onPhotoUpload: (Uri) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "피부 질환 검사하기",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White
+        Image(
+            painter = rememberImagePainter(photoUri),
+            contentDescription = null,
+            modifier = Modifier.size(200.dp),
+            contentScale = ContentScale.Crop
+        )
+        UploadCameraButton(
+            onClick = { /* 사진 변경 로직 */ },
+            buttonText = "사진 변경"
         )
     }
 }
@@ -132,6 +136,7 @@ fun GeneralCardContent(memo: String?) {
 @Composable
 fun UploadCameraButton(
     onClick: () -> Unit,
+    buttonText: String
 ) {
     Box(
         modifier = Modifier
@@ -152,13 +157,13 @@ fun UploadCameraButton(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_camera),
-                contentDescription = "사진 등록",
+                contentDescription = buttonText,
                 tint = PhotoIconActiveColor,
                 modifier = Modifier.size(12.dp) // 아이콘 크기 줄임
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "사진 등록",
+                text = buttonText,
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                 color = PhotoIconActiveColor
             )
@@ -269,7 +274,7 @@ fun ExpandableCard(
     state: CardState,
     memo: String?,
     onToggle: () -> Unit,
-    onPhotoUpload: () -> Unit
+    onPhotoUpload: (Uri) -> Unit
 ) {
     Card(
         modifier = Modifier

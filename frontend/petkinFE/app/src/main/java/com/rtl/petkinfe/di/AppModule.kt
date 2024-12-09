@@ -1,7 +1,9 @@
 package com.rtl.petkinfe.di
 
 import android.content.Context
+import androidx.room.Room
 import com.rtl.petkinfe.data.local.TokenDataSource
+import com.rtl.petkinfe.data.local.dao.PhotoDao
 import com.rtl.petkinfe.data.repository.AuthRepositoryImpl
 import com.rtl.petkinfe.domain.repository.AuthRepository
 import com.rtl.petkinfe.domain.usecases.AutoLoginUseCase
@@ -25,6 +27,23 @@ object AppModule {
     @Provides
     fun provideAutoLoginUseCase(authRepository: AuthRepository): AutoLoginUseCase {
         return AutoLoginUseCase(authRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(
+        @ApplicationContext context: Context
+    ): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "photo_database"
+        ).build()
+    }
+
+    @Provides
+    fun providePhotoDao(database: AppDatabase): PhotoDao {
+        return database.photoDao()
     }
 
 }
