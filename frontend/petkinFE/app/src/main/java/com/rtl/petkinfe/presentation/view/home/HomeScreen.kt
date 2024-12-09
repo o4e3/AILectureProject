@@ -1,7 +1,9 @@
 package com.rtl.petkinfe.presentation.view.home
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,7 +51,12 @@ import androidx.navigation.compose.rememberNavController
 import com.rtl.petkinfe.R
 import com.rtl.petkinfe.domain.model.HealthRecord
 import com.rtl.petkinfe.domain.model.ItemType
+import com.rtl.petkinfe.domain.model.ItemTypeColors
+import com.rtl.petkinfe.domain.model.ItemTypeTitles
+import com.rtl.petkinfe.presentation.view.core.IconSection
 import com.rtl.petkinfe.presentation.view.home.model.IconUIModel
+import com.rtl.petkinfe.ui.theme.PhotoIconActiveColor
+import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
 import com.rtl.petkinfe.utils.formatDate
 import com.rtl.petkinfe.utils.formatinHome
 //import com.rtl.petkinfe.presentation.view.core.widgets.ExpandableCardSection
@@ -58,14 +66,16 @@ import java.time.LocalDateTime
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController,  viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val todayRecords by viewModel.todayRecords
+    val cardStates by viewModel.cardStates
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { },
+                title = { Text("홈") },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Navigation drawer or back action */ }) {
+                    IconButton(onClick = { /* TODO: Navigation */ }) {
                         Icon(Icons.Filled.Menu, contentDescription = "Menu")
                     }
                 }
@@ -80,7 +90,12 @@ fun HomeScreen(navController: NavController,  viewModel: HomeViewModel = hiltVie
             TitleSection()
             IconSection()
             Spacer(modifier = Modifier.height(16.dp))
-            ExpandableCardSection(todayRecords) // 확장 가능한 카드 섹션
+            ExpandableCardSection(
+                records = todayRecords,
+                cardStates = cardStates,
+                onToggle = { viewModel.toggleCard(it) },
+                onPhotoUpload = { viewModel.uploadPhoto(it) }
+            )
         }
     }
 }
@@ -105,222 +120,140 @@ fun TitleSection() {
     }
 }
 
-@Composable
-fun IconSection() {
-    val iconItems = listOf(
-        IconUIModel(
-            iconResId = R.drawable.ic_camera,
-            contentDescription = "사진",
-            caption = "사진",
-            color = Color(0xffFF9626),
-            isActive = true
-        ),
-        IconUIModel(
-            iconResId = R.drawable.ic_drop,
-            contentDescription = "목욕",
-            caption = "목욕",
-            color = Color(0xff009DFF),
-            isActive = false
-        ),
-        IconUIModel(
-            iconResId = R.drawable.ic_goal,
-            contentDescription = "산책",
-            caption = "산책",
-            color = Color(0xff75EE05),
-            isActive = true
-        ),
-        IconUIModel(
-            iconResId = R.drawable.ic_bone,
-            contentDescription = "간식",
-            caption = "간식",
-            color = Color(0xffFCBDEB),
-            isActive = false
-        ),
-        IconUIModel(
-            iconResId = R.drawable.ic_capsule,
-            contentDescription = "약",
-            caption = "약",
-            color = Color(0xffFFC711),
-            isActive = true
-        ),
-        IconUIModel(
-            iconResId = R.drawable.ic_pen,
-            contentDescription = "접종",
-            caption = "접종",
-            color = Color(0xff6D6D6D),
-            isActive = false
-        ),
-        IconUIModel(
-            iconResId = R.drawable.ic_heart,
-            contentDescription = "병원",
-            caption = "병원",
-            color = Color(0xffF49393),
-            isActive = true
-        ),
-        IconUIModel(
-            iconResId = R.drawable.ic_edit_box,
-            contentDescription = "메모",
-            caption = "메모",
-            color = Color(0xffC109C1),
-            isActive = false
-        )
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        iconItems.forEach { item ->
-            IconWithCaption(item)
-        }
-    }
-}
 
 @Composable
-fun ExpandableCardSection(records: List<HealthRecord>) {
-    val categories = listOf(
-        "피부 질환 검사" to ItemType.PHOTO to Color(0xFFFFF1C1),
-        "목욕" to ItemType.BATH to Color(0xFFE1F5FE),
-        "산책" to ItemType.WALK to Color(0xFFDCEDC8),
-        "간식" to ItemType.SNACK to Color(0xFFFCE4EC),
-        "약" to ItemType.MEDICINE to Color(0xFFFFFBCB),
-        "접종" to ItemType.VACCINATION to Color(0xFFA5A5A5),
-        "병원" to ItemType.HOSPITAL to Color(0xFFF5AFAF),
-        "메모" to ItemType.MEMO to Color(0xFFCA9ECA),
-    )
-
+fun ExpandableCardSection(
+    records: List<HealthRecord>,
+    cardStates: Map<ItemType, CardState>,
+    onToggle: (ItemType) -> Unit,
+    onPhotoUpload: (ItemType) -> Unit
+) {
     LazyColumn(
         modifier = Modifier
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 18.dp)
             .fillMaxWidth()
-            .background(color = Color.White)
+            .background(Color.White)
     ) {
-        items(categories) { (titleWithType, color) ->
-            val (title, type) = titleWithType
-
-            // 해당 타입의 기록 찾기
-            val matchingRecord = records.find { it.itemType == type }
-            val isRecorded = matchingRecord != null
-            val memo = matchingRecord?.memo
-
-            // 카드 렌더링
-            Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp),
-                    fontWeight = FontWeight.Light,
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                ExpandableCard(color = color, title = title, isRecorded = isRecorded, memo = memo)
-            }
+        items(ItemType.values().toList()) { itemType ->
+            val record = records.find { it.itemType == itemType }
+            val state = cardStates[itemType] ?: CardState()
+            val backgroundColor = ItemTypeColors.backgroundColors[itemType] ?: Color.LightGray
+            val title = ItemTypeTitles.titles[itemType] ?: "기타"
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(title, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp), color = Color.Black, modifier = Modifier.padding(start = 6.dp, bottom = 2.dp))
+            ExpandableCard(
+                title = title,
+                color = backgroundColor,
+                state = state,
+                memo = record?.memo,
+                onToggle = { onToggle(itemType) },
+                onPhotoUpload = { onPhotoUpload(itemType) }
+            )
         }
     }
 }
 
 
-
 @Composable
-fun ExpandableCard(color: Color, title: String, isRecorded: Boolean, memo: String?) {
-    var isExpanded by remember { mutableStateOf(false) }
-    var isPhotoUploaded by remember { mutableStateOf(false) }
-
+fun ExpandableCard(
+    title: String,
+    color: Color,
+    state: CardState,
+    memo: String?,
+    onToggle: () -> Unit,
+    onPhotoUpload: () -> Unit
+) {
     Card(
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .background(color = color, shape = RoundedCornerShape(20.dp))
-            .padding(vertical = 8.dp) // 카드 사이의 간격
-            .clickable { isExpanded = !isExpanded }
+            .padding(vertical = 12.dp)
+            .clickable { onToggle() },
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = color)
+                .background(color)
                 .padding(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Black
+            CardHeader(title = title, isExpanded = state.isExpanded, memo =  memo, onToggle = onToggle, onAddRecord = { TODO()})
+            if (state.isExpanded) {
+                CardContent(
+                    title = title,
+                    isPhotoUploaded = state.isPhotoUploaded,
+                    memo = memo,
+                    onPhotoUpload = onPhotoUpload
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun CardHeader(
+    title: String,
+    isExpanded: Boolean,
+    memo: String?,
+    onToggle: () -> Unit,
+    onAddRecord: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp), // 동일한 높이로 설정
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 기록 여부에 따라 표시 텍스트 변경
+        Text(
+            text = if (memo == null) "기록이 없습니다" else "기록이 있습니다",
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            modifier = Modifier.padding(start = 6.dp)
+        )
+        when {
+            title == "피부 질환 검사" -> {
+                // 피부 질환 검사는 열기/닫기 버튼만 표시
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { isExpanded = !isExpanded }
+                    modifier = Modifier.padding(end = 6.dp)
+                    .clickable { onToggle() }
                 ) {
                     Text(
-                        text = if (isExpanded) "닫기" else "기록 ${if (isRecorded) "있음" else "없음"}",
+                        text = if (isExpanded) "닫기" else "열기",
                         color = Color.Black,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 14.sp
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = Icons.Filled.KeyboardArrowDown,
-                        contentDescription = "아래로 확장",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(24.dp)
+                        contentDescription = null,
+                        tint = Color.Black
                     )
                 }
             }
-
-            if (isExpanded) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = color)
-                        .padding(16.dp)
+            memo == null -> {
+                // 기록이 없는 경우 '기록 추가' 버튼 표시
+                AddRecordButton {
+                    onAddRecord()
+                }
+            }
+            else -> {
+                // 기록이 있는 경우 '열기/닫기' 버튼 표시
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onToggle() }
                 ) {
-                    if (title == "피부 질환 검사") {
-                        // 사진 업로드 버튼
-                        TextButton(
-                            onClick = { isPhotoUploaded = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = if (!isPhotoUploaded) "사진 업로드" else "사진 업로드 완료",
-                                fontWeight = FontWeight.Bold,
-                                color = if (!isPhotoUploaded) Color.Blue else Color.Green
-                            )
-                        }
-                        // 사진이 업로드된 경우 AI 검사 버튼 표시
-                        if (isPhotoUploaded) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            TextButton(
-                                onClick = { /* TODO: AI 검사 실행 */ },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "AI 검사 받기",
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Blue
-                                )
-                            }
-                        }
-                    } else {
-                        Text(
-                            text = "기본 확장 콘텐츠입니다.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Black
-                        )
-                    }
-                    if (isRecorded != null) {
-                        Text(
-                            text = "메모: $memo",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Black
-                        )
-                    } else {
-                        Text(
-                            text = "기록이 없습니다.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
-                    }
+                    Text(
+                        text = if (isExpanded) "닫기" else "열기",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                    Icon(
+                        imageVector = Icons.Filled.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = Color.Black
+                    )
                 }
             }
         }
@@ -330,24 +263,65 @@ fun ExpandableCard(color: Color, title: String, isRecorded: Boolean, memo: Strin
 
 
 @Composable
-fun IconWithCaption(item: IconUIModel) {
-    val iconColor = if (item.isActive) item.color else Color.Gray
-    val textColor = if (item.isActive) item.color else Color.Gray
+fun CardContent(
+    title: String,
+    isPhotoUploaded: Boolean,
+    memo: String?,
+    onPhotoUpload: () -> Unit
+) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        if (title == "피부 질환 검사") {
+            TextButton(onClick = { onPhotoUpload() }) {
+                Text(
+                    text = if (!isPhotoUploaded) "사진 업로드" else "사진 업로드 완료",
+                    color = if (!isPhotoUploaded) Color.Blue else Color.Green
+                )
+            }
+        } else {
+            Text(
+                text = "📋 메모",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (memo != null) {
+                Text(
+                    text = memo,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 4.dp)
+
+
+
+
+@Composable
+fun AddRecordButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .height(32.dp)
+            .background(
+                color = SplashBackgroundColor, // 버튼 배경색
+                shape = RoundedCornerShape(24.dp) // 둥근 모서리
+            )
+            .border(
+                BorderStroke(0.4.dp, PhotoIconActiveColor), // 테두리
+                shape = RoundedCornerShape(24.dp)
+            )
+            .clickable(onClick = onClick) // 클릭 이벤트 추가
+            .padding(horizontal = 12.dp), // 패딩 설정
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = painterResource(id = item.iconResId),
-            contentDescription = item.contentDescription,
-            tint = iconColor,
-            modifier = Modifier.size(22.dp)
-        )
         Text(
-            text = item.caption,
+            text = "기록 추가",
             fontSize = 12.sp,
-            color = textColor
+            color = Color.Black,
+            modifier = Modifier.align(Alignment.CenterVertically)
         )
     }
 }
