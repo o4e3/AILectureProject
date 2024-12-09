@@ -1,8 +1,8 @@
-from fastapi import Depends, HTTPException, APIRouter, status
+from fastapi import Depends, HTTPException, APIRouter, status, Path
 from sqlalchemy.orm import Session
 from datetime import datetime
 from petkinApp.models import HealthRecord  # HealthRecord 모델
-from petkinApp.schemas.health_records import HealthRecordCreateRequest, HealthRecordCreateResponse
+from petkinApp.schemas.health_records import HealthRecordCreateRequest, HealthRecordCreateResponse, HealthRecordDetailResponse
 from petkinApp.database import get_db
 from petkinApp.security import decode_jwt_token  # JWT 인증 처리
 
@@ -40,3 +40,25 @@ async def create_health_record(
 
     # 응답 반환
     return HealthRecordCreateResponse(record_id=new_record.record_id)
+
+@router.get("/{record_id}", response_model=HealthRecordDetailResponse, status_code=200)
+async def get_health_record(
+    record_id: int,
+    token: dict = Depends(decode_jwt_token),  # JWT 인증
+    db: Session = Depends(get_db)
+):
+    """
+    건강 기록 조회 API
+    """
+    # DB에서 record_id로 건강 기록 검색
+    record = db.query(HealthRecord).filter(HealthRecord.record_id == record_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="No health records found for the given pet")
+
+    # 응답 반환
+    return HealthRecordDetailResponse(
+        record_id=record.record_id,
+        item_id=record.item_id,
+        memo=record.memo,
+        timestamp=record.timestamp,
+    )

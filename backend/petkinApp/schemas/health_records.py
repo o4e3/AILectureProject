@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 #Field를 사용한 유효성 검사, ...은 필수 필드임을 의미
 class HealthRecordCreateRequest(BaseModel):
@@ -8,3 +9,9 @@ class HealthRecordCreateRequest(BaseModel):
 
 class HealthRecordCreateResponse(BaseModel):
     record_id: int = Field(..., )
+
+class HealthRecordDetailResponse(BaseModel):
+    record_id: int = Field(..., gt=0)
+    item_id: int = Field(..., gt=0)
+    memo: str = Field(..., max_length=500)
+    timestamp: datetime = Field(..., )
