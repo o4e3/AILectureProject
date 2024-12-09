@@ -249,6 +249,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+model.pt
 
 # Spyder project settings
 .spyderproject
