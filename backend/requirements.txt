@@ -2,7 +2,7 @@ anyio==4.6.2.post1
 certifi==2024.8.30
 charset-normalizer==3.4.0
 click==8.1.7
-fastapi>=0.101.0
+fastapi
 h11==0.14.0
 httptools==0.6.4
 idna==3.10
@@ -18,8 +18,10 @@ starlette==0.27.0
 typing_extensions==4.12.2
 urllib3==1.26.15
 uvicorn==0.22.0
-#uvloop==0.21.0
 watchfiles==1.0.0
 websockets==14.1
 pymysql
-torch
+torch==2.4
+torchvision==0.19
+pillow~=11.0.0
+python-multipart
