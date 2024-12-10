@@ -6,7 +6,9 @@ import com.rtl.petkinfe.data.local.TokenDataSource
 import com.rtl.petkinfe.data.local.dao.PhotoDao
 import com.rtl.petkinfe.data.repository.AuthRepositoryImpl
 import com.rtl.petkinfe.domain.repository.AuthRepository
+import com.rtl.petkinfe.domain.repository.PredictionRepository
 import com.rtl.petkinfe.domain.usecases.AutoLoginUseCase
+import com.rtl.petkinfe.domain.usecases.SavePhotoUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,6 +46,11 @@ object AppModule {
     @Provides
     fun providePhotoDao(database: AppDatabase): PhotoDao {
         return database.photoDao()
+    }
+
+    @Provides
+    fun provideSavePhotoUseCase(predictionRepository: PredictionRepository): SavePhotoUseCase {
+        return SavePhotoUseCase(predictionRepository)
     }
 
 }

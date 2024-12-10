@@ -7,4 +7,6 @@ import java.io.File
 interface PredictionRepository {
     fun requestPrediction(petId: Long, imageFile: File): Prediction
     fun getPredictionById(analysisId: Long): PredictionDetail
+
+    suspend fun savePhoto(imageFile: File): String
 }

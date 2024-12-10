@@ -1,78 +1,63 @@
 package com.rtl.petkinfe.presentation.view.home
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.BorderStroke
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.protobuf.Internal.BooleanList
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.rtl.petkinfe.R
-import com.rtl.petkinfe.domain.model.HealthRecord
 import com.rtl.petkinfe.domain.model.ItemType
 import com.rtl.petkinfe.domain.model.ItemTypeColors
 import com.rtl.petkinfe.domain.model.ItemTypeTitles
-import com.rtl.petkinfe.presentation.view.core.AddRecordButton
-import com.rtl.petkinfe.presentation.view.core.CardContent
-import com.rtl.petkinfe.presentation.view.core.CardHeader
 import com.rtl.petkinfe.presentation.view.core.ExpandableCard
 import com.rtl.petkinfe.presentation.view.core.IconSection
-import com.rtl.petkinfe.presentation.view.home.model.IconUIModel
-import com.rtl.petkinfe.ui.theme.PhotoIconActiveColor
-import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
-import com.rtl.petkinfe.utils.formatDate
+import com.rtl.petkinfe.utils.convertUriToFile
 import com.rtl.petkinfe.utils.formatinHome
-//import com.rtl.petkinfe.presentation.view.core.widgets.ExpandableCardSection
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
-    val todayRecords by viewModel.todayRecords
-    val cardStates by viewModel.cardStates
+    val uiState by viewModel.uiState
+    val context = LocalContext.current // Context 가져오기
+
+    // 사진 선택 런처
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val file = convertUriToFile(context, uri)
+            viewModel.uploadPhoto(ItemType.PHOTO, file)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -95,10 +80,9 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
             IconSection()
             Spacer(modifier = Modifier.height(16.dp))
             ExpandableCardSection(
-                records = todayRecords,
-                cardStates = cardStates,
-                onToggle = { viewModel.toggleCard(it) },
-                onPhotoUpload = { viewModel.uploadPhoto(it) }
+                uiState = uiState,
+                onToggle = viewModel::toggleCard,
+                onPhotoUpload = { photoPickerLauncher.launch("image/*") }
             )
         }
     }
@@ -127,10 +111,9 @@ fun TitleSection() {
 
 @Composable
 fun ExpandableCardSection(
-    records: List<HealthRecord>,
-    cardStates: Map<ItemType, CardState>,
+    uiState: HomeUIState,
     onToggle: (ItemType) -> Unit,
-    onPhotoUpload: (ItemType) -> Unit
+    onPhotoUpload: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -138,22 +121,32 @@ fun ExpandableCardSection(
             .fillMaxWidth()
             .background(Color.White)
     ) {
+        // 모든 ItemType에 대해 처리
         items(ItemType.values().toList()) { itemType ->
-            val record = records.find { it.itemType == itemType }
-            val state = cardStates[itemType] ?: CardState()
-            val backgroundColor = ItemTypeColors.backgroundColors[itemType] ?: Color.LightGray
+            val record = uiState.records.find { it.itemType == itemType }
+            val state = uiState.cardStates[itemType] ?: CardState()
+            val backgroundColor =
+                ItemTypeColors.backgroundColors[itemType] ?: Color.LightGray
             val title = ItemTypeTitles.titles[itemType] ?: "기타"
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(title, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp), color = Color.Black, modifier = Modifier.padding(start = 6.dp, bottom = 2.dp))
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                color = Color.Black,
+                modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
+            )
             ExpandableCard(
                 title = title,
                 color = backgroundColor,
                 state = state,
-                memo = record?.memo,
+                memo = record?.memo, // 기록이 없는 경우 null
+                photoUrl = state.photoUrl, // 기본 URL 처리
                 onToggle = { onToggle(itemType) },
-                onPhotoUpload = { onPhotoUpload(itemType) }
+                onPhotoUpload = if (itemType == ItemType.PHOTO) onPhotoUpload else ({})
             )
         }
     }
 }
+
 

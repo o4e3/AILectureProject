@@ -1,6 +1,7 @@
 package com.rtl.petkinfe.presentation.view.core
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -25,7 +26,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,77 +44,55 @@ import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
 @Composable
 fun CardContent(
     title: String,
-    isPhotoUploaded: Boolean,
     memo: String?,
-    onPhotoUpload: (Uri) -> Unit,
+    photoUrl: String?, // URL 표시
+    onPhotoUpload: (() -> Unit) ,
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
-        when (title) {
-            "피부 질환 검사" -> {
-                SkinCheckCardContent(isPhotoUploaded, onPhotoUpload, null)
-            }
-            else -> {
-                GeneralCardContent(memo)
-            }
+        if (title == "피부 질환 검사") {
+            PhotoContent(photoUrl, onPhotoUpload)
+        } else {
+            GeneralCardContent(memo)
         }
     }
 }
 
-
 @Composable
-fun SkinCheckCardContent(
-    isPhotoUploaded: Boolean,
-    onPhotoUpload: (Uri) -> Unit, // 선택된 사진 URI를 전달
-    selectedPhotoUri: Uri? // 선택된 사진 URI
+fun PhotoContent(
+    photoUrl: String?,
+    onPhotoUpload: () -> Unit
 ) {
-    if (selectedPhotoUri != null) {
-        PhotoDisplayedContent(selectedPhotoUri, onPhotoUpload)
-    } else {
-        PhotoNotUploadedContent(onPhotoUpload)
-    }
-}
-
-@Composable
-fun PhotoNotUploadedContent(onPhotoUpload: (Uri) -> Unit) {
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            onPhotoUpload(uri) // 선택된 사진 URI 전달
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (!photoUrl.isNullOrEmpty()) {
+            Image(
+                painter = rememberImagePainter(
+                    data = photoUrl,
+                    builder = {
+                        placeholder(R.drawable.res_dog)
+                        error(R.drawable.res_dog)
+                    }
+                ),
+                contentDescription = "Uploaded Photo",
+                modifier = Modifier.size(200.dp),
+                contentScale = ContentScale.Crop
+            )
+            Log.d("testt", "photoUrl: $photoUrl")
+            UploadCameraButton(onClick = onPhotoUpload, buttonText = "사진 변경")
+        } else {
+            Text(
+                "사진이 없습니다",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            UploadCameraButton(onClick = onPhotoUpload, buttonText = "사진 등록")
         }
     }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("사진이 없습니다", style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        UploadCameraButton(
-            onClick = { photoPickerLauncher.launch("image/*") },
-            buttonText = "사진 등록"
-        )
-    }
 }
 
-@Composable
-fun PhotoDisplayedContent(photoUri: Uri, onPhotoUpload: (Uri) -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = rememberImagePainter(photoUri),
-            contentDescription = null,
-            modifier = Modifier.size(200.dp),
-            contentScale = ContentScale.Crop
-        )
-        UploadCameraButton(
-            onClick = { /* 사진 변경 로직 */ },
-            buttonText = "사진 변경"
-        )
-    }
-}
+
 
 @Composable
 fun GeneralCardContent(memo: String?) {
@@ -138,6 +116,7 @@ fun UploadCameraButton(
     onClick: () -> Unit,
     buttonText: String
 ) {
+    Log.d("testt", "사진 등록 클릭")
     Box(
         modifier = Modifier
             .border(
@@ -273,8 +252,9 @@ fun ExpandableCard(
     color: Color,
     state: CardState,
     memo: String?,
+    photoUrl: String?, // URL 추가
     onToggle: () -> Unit,
-    onPhotoUpload: (Uri) -> Unit
+    onPhotoUpload: () -> Unit // 런처 호출 콜백
 ) {
     Card(
         modifier = Modifier
@@ -293,9 +273,9 @@ fun ExpandableCard(
             if (state.isExpanded) {
                 CardContent(
                     title = title,
-                    isPhotoUploaded = state.isPhotoUploaded,
                     memo = memo,
-                    onPhotoUpload = onPhotoUpload
+                    photoUrl = photoUrl, // URL 전달
+                    onPhotoUpload = onPhotoUpload // 기본값 제공
                 )
             }
         }

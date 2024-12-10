@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.rtl.petkinfe.data.local.entity.Photo
+import java.io.File
 
 @Dao
 interface PhotoDao {
