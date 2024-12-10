@@ -16,7 +16,8 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
+./*.pyc
+__pycache__
 # AWS User-specific
 .idea/**/aws.xml
 

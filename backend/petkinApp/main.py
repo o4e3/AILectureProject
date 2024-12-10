@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-from petkinApp.routers import customers, pets, prediction
+from petkinApp.routers import customers, pets, health_records, prediction
 
 app = FastAPI(
     title="Petkin API",
@@ -12,7 +12,7 @@ app = FastAPI(
 app.include_router(customers.router, prefix="/api", tags=["customers-controller"])
 app.include_router(pets.router, prefix="/api", tags=["pets-controller"])
 app.include_router(prediction.router, prefix="/api", tags=["prediction-controller"])
-
+app.include_router(health_records.router, prefix="/api", tags=["health-records-controller"])
 
 # OpenAPI 스키마 수정
 def custom_openapi():

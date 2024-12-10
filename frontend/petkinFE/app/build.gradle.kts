@@ -5,7 +5,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.hilt) // Hilt 플러그인 추가
-    id("kotlin-kapt") // Kapt 플러그인 추가
+    id("kotlin-kapt")
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
 }
 
 val properties = Properties()
@@ -114,6 +115,13 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.15.1")
     implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
 }
 
 // local.properties 파일에서 API_BASE_URL 읽어오는 함수
