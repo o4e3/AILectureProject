@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import gdown
 from fastapi import FastAPI, File, UploadFile, HTTPException, APIRouter, Form, Depends
+from pytz import timezone
 from sqlalchemy.orm import Session, session
 from torch import nn
 import torch
@@ -15,7 +16,7 @@ from httpx import AsyncClient
 import torch.nn.functional as F
 
 from petkinApp.database import get_db
-from petkinApp.models import AIResult
+from petkinApp.models import AIResult, DiseasePredictionRecord
 from petkinApp.routers.pets import get_pet
 from petkinApp.schemas.pets import PetDetailResponse
 
@@ -215,6 +216,19 @@ async def predict_api(
             print("Logits with features:", logits)
             print("Probabilities with features:", probabilities)
 
+        # 이미지 저장 및 URL 생성
+        upload_dir = "static/uploads"
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+
+        image_filename = f"{pet_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.jpg"
+        image_path = os.path.join("static/uploads", image_filename)  # 저장 경로
+
+        with open(image_path, "wb") as f:
+            f.write(image.file.read())
+        image_url = f"/static/uploads/{image_filename}"
+
+
         # 가장 높은 클래스 인덱스 및 이름 가져오기
         class_mapping = {
                 0: "A1 구진/플라크",
@@ -236,7 +250,8 @@ async def predict_api(
             session=db,
             pet_id=pet_id,
             model_name=model_name,
-            probabilities=probabilities
+            probabilities=probabilities,
+            image_url=image_url
         )
 
         # JSON 형식으로 결과 반환
@@ -283,10 +298,14 @@ def debug_model_parameters(model):
         print(f"Shape: {value.shape}")
 
 
-def save_prediction_to_db(session: Session, pet_id, model_name, probabilities):
+def save_prediction_to_db(session: Session, pet_id, model_name, probabilities, image_url):
     """
     Save prediction results to the database.
     """
+    # 한국 시간 생성
+    timestamp_kst = datetime.now(timezone('Asia/Seoul'))
+
+    # 1. AIResult에 저장
     new_result = AIResult(
         model_name=model_name,
         accuracy=max(probabilities),  # Use the highest probability as a proxy for accuracy
@@ -301,4 +320,84 @@ def save_prediction_to_db(session: Session, pet_id, model_name, probabilities):
     session.add(new_result)
     session.commit()
     session.refresh(new_result)  # Retrieve the inserted record with auto-incremented ID
-    return new_result.analysis_id
+    analysis_id = new_result.analysis_id
+
+    # 2. DiseasePredictionRecord에 저장
+    # 가장 높은 확률을 가진 disease_id 계산
+    predicted_class_index = probabilities.index(max(probabilities)) + 1  # 클래스 1부터 시작
+    new_record = DiseasePredictionRecord(
+        record_id=None,  # 자동 증가 필드
+        pet_id=pet_id,
+        disease_id=predicted_class_index,  # FK로 연결된 disease_id
+        analysis_id=analysis_id,  # FK로 연결된 analysis_id
+        image_url=image_url,  # 이미지 URL
+        timestamp=timestamp_kst,
+    )
+    session.add(new_record)
+    session.commit()
+    return analysis_id
+
+
+@router.get("/records/{pet_id}")
+async def get_records_by_pet_and_date(
+    pet_id: int,
+    date: str,  # YYYY-MM-DD 형식의 날짜를 쿼리 파라미터로 받음
+    db: Session = Depends(get_db)
+):
+    """
+    특정 pet_id와 날짜를 기준으로 DiseasePredictionRecord를 조회합니다.
+    :param db:
+    :param pet_id: 반려동물 ID (path parameter)
+    :param date: 조회 날짜 (YYYY-MM-DD 형식, query parameter)
+    """
+    try:
+        # 날짜 형식 검증 및 변환
+        try:
+            date_obj = datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+        # 시작 및 종료 범위 설정 (해당 날짜의 00:00:00부터 23:59:59까지)
+        start_datetime = datetime.combine(date_obj, datetime.min.time())
+        end_datetime = datetime.combine(date_obj, datetime.max.time())
+
+        # 쿼리 실행
+        print(f"Querying records for pet_id={pet_id} between {start_datetime} and {end_datetime}")
+        records = (
+            db.query(DiseasePredictionRecord)
+            .filter(
+                DiseasePredictionRecord.pet_id == pet_id,
+                DiseasePredictionRecord.timestamp >= start_datetime,
+                DiseasePredictionRecord.timestamp <= end_datetime
+            )
+            .all()
+        )
+
+        # 결과 확인
+        if not records:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No records found for pet_id {pet_id} on {date}."
+            )
+
+        # JSON 응답 생성
+        response = [
+            {
+                "record_id": record.record_id,
+                "pet_id": record.pet_id,
+                "disease_id": record.disease_id,
+                "analysis_id": record.analysis_id,
+                "image_url": record.image_url,
+                "timestamp": record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for record in records
+        ]
+
+        return {"records": response}
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
+    except Exception as e:
+        print(f"Error while retrieving records: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve records: {str(e)}")
+

@@ -46,3 +46,12 @@ class AIResult(Base):
     A5 = Column(Float, nullable=False)
     A6 = Column(Float, nullable=False)
     A7 = Column(Float, nullable=False)
+
+class DiseasePredictionRecord(Base):
+    __tablename__ = "DiseasePredictionRecord"
+    record_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    pet_id = Column(BigInteger, ForeignKey("pets.pet_id"), nullable=False)
+    disease_id = Column(BigInteger, nullable=False)  # 연결된 라벨
+    analysis_id = Column(BigInteger, ForeignKey("AIResult.analysis_id"), nullable=False)
+    image_url = Column(String(255), nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
