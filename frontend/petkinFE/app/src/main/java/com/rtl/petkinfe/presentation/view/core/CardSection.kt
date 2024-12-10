@@ -79,8 +79,9 @@ fun PhotoContent(
                 modifier = Modifier.size(200.dp),
                 contentScale = ContentScale.Crop
             )
-            Log.d("testt", "photoUrl: $photoUrl")
             UploadCameraButton(onClick = onPhotoUpload, buttonText = "사진 변경")
+            Spacer(modifier = Modifier.height(24.dp))
+            RequestPredictionButton(onClick = { /* TODO */ }, onActive = true)
         } else {
             Text(
                 "사진이 없습니다",
@@ -88,11 +89,37 @@ fun PhotoContent(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             UploadCameraButton(onClick = onPhotoUpload, buttonText = "사진 등록")
+            Spacer(modifier = Modifier.height(24.dp))
+            RequestPredictionButton(onClick = { /* TODO */ }, onActive = false)
         }
     }
 }
 
-
+@Composable
+fun RequestPredictionButton(
+    onClick: () -> Unit,
+    onActive: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .size(width = 240.dp, height = 36.dp)
+            .background(
+                color = if (onActive) Color(0xFFFFA500) else Color.LightGray, // 활성 상태에 따라 색상 변경
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable(enabled = onActive, onClick = onClick) // 활성 상태에 따라 클릭 가능 여부 설정
+                ,
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (onActive) "피부 질환 검사하기" else "사진을 등록해주세요",
+            color = Color.White,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
 
 @Composable
 fun GeneralCardContent(memo: String?) {
