@@ -1,8 +1,11 @@
 import json
 import os
+from datetime import datetime
+
 import pandas as pd
 import gdown
 from fastapi import FastAPI, File, UploadFile, HTTPException, APIRouter, Form, Depends
+from sqlalchemy.orm import Session, session
 from torch import nn
 import torch
 from torchvision import transforms, models
@@ -10,6 +13,9 @@ from PIL import Image
 from sklearn.preprocessing import MinMaxScaler
 from httpx import AsyncClient
 import torch.nn.functional as F
+
+from petkinApp.database import get_db
+from petkinApp.models import AIResult
 from petkinApp.routers.pets import get_pet
 from petkinApp.schemas.pets import PetDetailResponse
 
@@ -171,6 +177,7 @@ async def predict_api(
         pet_id: int,
         image: UploadFile = File(...),
         pet_info: PetDetailResponse = Depends(get_pet),
+        db: Session = Depends(get_db)
 ):
     try:
         # 디버깅 로그 추가
@@ -204,29 +211,49 @@ async def predict_api(
         # 모델 예측
         with torch.no_grad():
             logits = model(image_tensor, additional_features_tensor)
-            probabilities = F.softmax(logits, dim=1)  # 확률로 변환
+            probabilities = F.softmax(logits, dim=1).squeeze(0).tolist()  # 1D 리스트로 변환
             print("Logits with features:", logits)
             print("Probabilities with features:", probabilities)
-            logits_without_features = model(image_tensor, torch.zeros_like(additional_features_tensor))
-            probabilities_without_features = F.softmax(logits_without_features, dim=1)
-            print("Logits without features:", logits_without_features)
-            print("Probabilities without features:", probabilities_without_features)
 
+        # 가장 높은 클래스 인덱스 및 이름 가져오기
         class_mapping = {
-            0: "A1 구진/플라크",
-            1: "A2 비듬/각질/상피성잔고리",
-            2: "A3 태선화 과다색소침착",
-            3: "A4 농포/여드름",
-            4: "A5 미란/궤양",
-            5: "A6 결정/종괴",
-            6: "A7 무증상"
+                0: "A1 구진/플라크",
+                1: "A2 비듬/각질/상피성잔고리",
+                2: "A3 태선화 과다색소침착",
+                3: "A4 농포/여드름",
+                4: "A5 미란/궤양",
+                5: "A6 결정/종괴",
+                6: "A7 무증상"
         }
-        predicted_class = probabilities.argmax(dim=1).item()
-        predicted_class_label = class_mapping[predicted_class]
-        print(f"Predicted class label: {predicted_class_label}")
+        predicted_class_index = torch.argmax(torch.tensor(probabilities)).item()  # 가장 높은 인덱스
+        predicted_class_label = class_mapping[predicted_class_index]
 
-        # 클래스 0부터 시작이므로 +1
-        return {"predicted_class": predicted_class + 1}
+        # 모델 이름 (예: EfficientNet)
+        model_name = "MultimodalModel-EfficientNetB0"
+
+        # 결과를 데이터베이스에 저장
+        analysis_id = save_prediction_to_db(
+            session=db,
+            pet_id=pet_id,
+            model_name=model_name,
+            probabilities=probabilities
+        )
+
+        # JSON 형식으로 결과 반환
+        response = {
+            "analysis_id": analysis_id,
+            "analysis_date": datetime.utcnow().strftime("%Y-%m-%d"),
+            "predicted_class_label": predicted_class_label,
+            "A1": probabilities[0],
+            "A2": probabilities[1],
+            "A3": probabilities[2],
+            "A4": probabilities[3],
+            "A5": probabilities[4],
+            "A6": probabilities[5],
+            "A7": probabilities[6]
+        }
+        return response
+
     except Exception as e:
         print(f"Error during prediction: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -255,3 +282,23 @@ def debug_model_parameters(model):
         print(f"Key: {key}")
         print(f"Shape: {value.shape}")
 
+
+def save_prediction_to_db(session: Session, pet_id, model_name, probabilities):
+    """
+    Save prediction results to the database.
+    """
+    new_result = AIResult(
+        model_name=model_name,
+        accuracy=max(probabilities),  # Use the highest probability as a proxy for accuracy
+        A1=probabilities[0],
+        A2=probabilities[1],
+        A3=probabilities[2],
+        A4=probabilities[3],
+        A5=probabilities[4],
+        A6=probabilities[5],
+        A7=probabilities[6],
+    )
+    session.add(new_result)
+    session.commit()
+    session.refresh(new_result)  # Retrieve the inserted record with auto-incremented ID
+    return new_result.analysis_id
