@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.hilt) // Hilt 플러그인 추가
-    id("kotlin-kapt") // Kapt 플러그인 추가
-    id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
 }
 
 val properties = Properties()
