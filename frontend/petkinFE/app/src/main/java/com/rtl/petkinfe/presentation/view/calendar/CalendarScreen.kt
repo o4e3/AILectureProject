@@ -48,9 +48,6 @@ fun CalendarScreen(navController: NavHostController) {
             CalendarContent() // 캘린더 뷰 추가
             Divider(color= Color.Gray, thickness = 0.8.dp)
             Spacer(modifier = Modifier.height(20.dp))
-            ExpandableCardSection(listOf(
-                HealthRecord(6, ItemType.BATH, "밥 먹"),
-            ))
         }
     }
 }
