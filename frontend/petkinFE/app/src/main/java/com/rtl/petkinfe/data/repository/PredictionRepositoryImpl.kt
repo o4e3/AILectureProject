@@ -6,10 +6,11 @@ import com.rtl.petkinfe.data.local.entity.Photo
 import com.rtl.petkinfe.data.mapper.toDomain
 import com.rtl.petkinfe.data.remote.api.PredictionApi
 import com.rtl.petkinfe.domain.model.Prediction
-import com.rtl.petkinfe.domain.model.PredictionDetail
+import com.rtl.petkinfe.domain.model.PredictionWithImage
 import com.rtl.petkinfe.domain.repository.PredictionRepository
 import com.rtl.petkinfe.utils.createImagePart
 import java.io.File
+import java.time.LocalDate
 import javax.inject.Inject
 
 class PredictionRepositoryImpl @Inject constructor(
@@ -45,7 +46,7 @@ class PredictionRepositoryImpl @Inject constructor(
         return prediction
     }
 
-    override fun getPredictionById(analysisId: Long): PredictionDetail {
+    override fun getPredictionById(analysisId: Long): Prediction {
         TODO("Not yet implemented")
     }
 
@@ -68,5 +69,32 @@ class PredictionRepositoryImpl @Inject constructor(
         photoDao.insertPhoto(photo)
         Log.d("testt", "savePhoto3: $photo")
         return imageFile.absolutePath // 저장된 파일 경로 반환
+    }
+
+
+    override suspend fun getPredictionsByDate(petId: Long, date: LocalDate): PredictionWithImage? {
+        val dateString = date.toString() // "YYYY-MM-DD" 형식
+        // 1. 날짜와 petId를 기준으로 데이터 조회
+        val records = predictionApi.getRecordsByPetAndDate(petId, dateString)
+
+        // 2. 가장 최신의 기록 가져오기
+        val latestRecord = records.predictions.maxByOrNull { it.timestamp } ?: return null
+
+        // 3. 해당 analysisId로 상세 데이터 가져오기
+        return try {
+            val detailResponse = predictionApi.getPredictionDetailById(latestRecord.analysisId)
+
+            // 4. photoDao에서 predictionId 기준으로 URL 가져오기
+            val photo = photoDao.getPhotoByPredictionId(latestRecord.analysisId)
+            val resolvedImageUrl = photo?.uri ?: latestRecord.imageUrl // photo가 없으면 기존 URL 사용
+
+            PredictionWithImage(
+                prediction = detailResponse.toDomain(latestRecord.timestamp), // DTO -> Domain 변환
+                imageUrl = resolvedImageUrl // photoDao에서 가져온 URL 사용
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null // 예외 발생 시 null 반환
+        }
     }
 }

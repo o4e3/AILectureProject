@@ -6,8 +6,10 @@ import com.rtl.petkinfe.data.local.TokenDataSource
 import com.rtl.petkinfe.data.local.dao.PhotoDao
 import com.rtl.petkinfe.data.repository.AuthRepositoryImpl
 import com.rtl.petkinfe.domain.repository.AuthRepository
+import com.rtl.petkinfe.domain.repository.PetRepository
 import com.rtl.petkinfe.domain.repository.PredictionRepository
 import com.rtl.petkinfe.domain.usecases.AutoLoginUseCase
+import com.rtl.petkinfe.domain.usecases.GetTodayPredictionUseCase
 import com.rtl.petkinfe.domain.usecases.SavePhotoUseCase
 import dagger.Module
 import dagger.Provides
@@ -51,6 +53,14 @@ object AppModule {
     @Provides
     fun provideSavePhotoUseCase(predictionRepository: PredictionRepository): SavePhotoUseCase {
         return SavePhotoUseCase(predictionRepository)
+    }
+
+    @Provides
+    fun provideGetTodayPredictionUseCase(
+        petRepository: PetRepository,
+        predictionRepository: PredictionRepository
+    ): GetTodayPredictionUseCase {
+        return GetTodayPredictionUseCase(petRepository, predictionRepository)
     }
 
 }
