@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import com.rtl.petkinfe.BuildConfig.API_BASE_URL
+
 import com.rtl.petkinfe.R
 import com.rtl.petkinfe.domain.model.ItemType
 import com.rtl.petkinfe.presentation.view.home.CardState
@@ -369,4 +371,25 @@ fun ExpandableCard(
             }
         }
     }
+}
+
+@Composable
+fun RenderPredictionImage(imageUrl: String) {
+    val baseUrl = API_BASE_URL.removeSuffix("/") // 마지막 "/" 제거
+    val fullImageUrl = "$baseUrl$imageUrl"
+    Log.d("testt", "fullImageUrl: $fullImageUrl")
+    Image(
+        painter = rememberImagePainter(
+            data = fullImageUrl,
+            builder = {
+                placeholder(R.drawable.res_dog) // 로딩 중 표시할 이미지
+                error(R.drawable.res_dog)           // 로드 실패 시 표시할 이미지
+            }
+        ),
+        contentDescription = "Prediction Image",
+        modifier = Modifier
+            .size(200.dp) // 이미지 크기 조정
+            .padding(8.dp),
+        contentScale = ContentScale.Crop
+    )
 }

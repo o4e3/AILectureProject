@@ -14,13 +14,11 @@ class PetRepositoryImpl @Inject constructor(
     private val sharedPrefManager: SharedPrefManager
 ): PetRepository {
     override suspend fun getMyPetList(): List<Pet> {
-        Log.d("펫등록", "getMyPetList 호출")
         return try {
             val response = petApi.getMyPets().toDomainModel()
             Log.d("펫등록", response.toString())
             response
         } catch (e: Exception) {
-            Log.e("펫등록", "getMyPetList 예외 발생: ${e.message}", e)
             emptyList() // 기본값 반환
         }
     }

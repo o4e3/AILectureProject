@@ -3,7 +3,7 @@ package com.rtl.petkinfe.data.remote.dto
 import com.google.gson.annotations.SerializedName
 import java.sql.Timestamp
 
-data class PredictionResponseDto(
+data class RequestPredictionResponseDto(
     @SerializedName("analysis_id")
     val analysisId: Long,
     @SerializedName("analysis_date")
@@ -19,7 +19,27 @@ data class PredictionResponseDto(
     val A7: Float
 )
 
+
 data class PredictionDetailResponseDto(
+    @SerializedName("analysis_id")
+    val analysisId: Long,
+    @SerializedName("model_name")
+    val modelName: String,
+    val accuracy: Float,
+    val A1: Float,
+    val A2: Float,
+    val A3: Float,
+    val A4: Float,
+    val A5: Float,
+    val A6: Float,
+    val A7: Float
+)
+
+data class PredictionRecordsResponseDto(
+    @SerializedName("predictions") val predictions: List<PredictionRecordResponseDto>
+)
+
+data class PredictionRecordResponseDto(
     @SerializedName("record_id")
     val recordId: Long,
     @SerializedName("pet_id")

@@ -21,6 +21,8 @@ interface PhotoDao {
     @Query("SELECT * FROM photos WHERE uri = :uri LIMIT 1")
     suspend fun getPhotoByUri(uri: String): Photo?
 
+    @Query("SELECT * FROM photos WHERE predictionId = :predictionId LIMIT 1")
+    suspend fun getPhotoByPredictionId(predictionId: Long): Photo?
 
     @Query(
         """

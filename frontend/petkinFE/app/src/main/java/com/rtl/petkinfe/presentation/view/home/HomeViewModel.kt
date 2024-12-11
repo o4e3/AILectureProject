@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.rtl.petkinfe.domain.model.HealthRecord
 import com.rtl.petkinfe.domain.model.ItemType
 import com.rtl.petkinfe.domain.model.Prediction
+import com.rtl.petkinfe.domain.usecases.GetTodayPredictionUseCase
 import com.rtl.petkinfe.domain.usecases.GetTodayRecordUseCase
 import com.rtl.petkinfe.domain.usecases.RequestPredictionUseCase
 import com.rtl.petkinfe.domain.usecases.SavePhotoUseCase
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTodayRecordUseCase: GetTodayRecordUseCase,
+    private val getTodayPredictionUseCase: GetTodayPredictionUseCase,
     private val savePhotoUseCase: SavePhotoUseCase,
     private val requestPredictionUseCase: RequestPredictionUseCase
 ) : ViewModel() {
@@ -32,6 +34,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadRecords()
+        loadPrediction()
     }
 
     private fun loadRecords() {
@@ -40,6 +43,26 @@ class HomeViewModel @Inject constructor(
         _uiState.value = HomeUIState(records = records, cardStates = cardStates)
         // 아이콘 상태 초기화
         initializeIconStates(records)
+    }
+
+    private fun loadPrediction() {
+        viewModelScope.launch {
+            val prediction = getTodayPredictionUseCase.execute()
+            if (prediction != null) {
+                Log.d("testt", "loadPrediction: $prediction")
+                Log.d("testt", "loadPrediction: ${prediction.imageUrl}")
+                updateCardState(ItemType.PHOTO) { it.copy(prediction = prediction.prediction, photoUrl = prediction.imageUrl) }
+            }
+        }
+    }
+
+    private fun updateCardState(itemType: ItemType, update: (CardState) -> CardState) {
+        _uiState.value = _uiState.value.copy(
+            cardStates = _uiState.value.cardStates.toMutableMap().apply {
+                val currentState = this[itemType] ?: return@apply
+                this[itemType] = update(currentState)
+            }
+        )
     }
 
     private fun initializeIconStates(records: List<HealthRecord>) {
