@@ -72,7 +72,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
+    fun requestPrediction(itemType: ItemType) {
+        if (itemType != ItemType.PHOTO) return
+        viewModelScope.launch {
+            // TODO: Add API call logic here to request prediction
+            Log.d("testt", "Prediction requested for $itemType")
+        }
+    }
 }
 
 

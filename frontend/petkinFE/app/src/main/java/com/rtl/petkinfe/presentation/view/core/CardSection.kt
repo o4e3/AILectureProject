@@ -35,9 +35,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.rtl.petkinfe.R
+import com.rtl.petkinfe.domain.model.ItemType
 import com.rtl.petkinfe.presentation.view.home.CardState
+import com.rtl.petkinfe.presentation.view.home.HomeViewModel
 import com.rtl.petkinfe.ui.theme.PhotoIconActiveColor
 import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
 
@@ -60,7 +63,8 @@ fun CardContent(
 @Composable
 fun PhotoContent(
     photoUrl: String?,
-    onPhotoUpload: () -> Unit
+    onPhotoUpload: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -81,7 +85,7 @@ fun PhotoContent(
             )
             UploadCameraButton(onClick = onPhotoUpload, buttonText = "사진 변경")
             Spacer(modifier = Modifier.height(24.dp))
-            RequestPredictionButton(onClick = { /* TODO */ }, onActive = true)
+            RequestPredictionButton(onClick = { viewModel.requestPrediction(ItemType.PHOTO)  }, onActive = true)
         } else {
             Text(
                 "사진이 없습니다",
@@ -90,6 +94,7 @@ fun PhotoContent(
             )
             UploadCameraButton(onClick = onPhotoUpload, buttonText = "사진 등록")
             Spacer(modifier = Modifier.height(24.dp))
+            // 알림창으로 '사진을 등록해주세요' 메시지 표시
             RequestPredictionButton(onClick = { /* TODO */ }, onActive = false)
         }
     }
