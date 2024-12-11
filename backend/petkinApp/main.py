@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from petkinApp.routers import customers, pets, health_records, prediction
+from petkinApp.routers.prediction import load_model, initialize_model_and_save
 
 app = FastAPI(
     title="Petkin API",
@@ -50,3 +51,15 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi
+
+# 모델 로드
+@app.on_event("startup")
+async def startup_event():
+    try:
+        print("Initializing model...")
+        # 모델 초기화 및 저장
+        initialize_model_and_save("model.pt")
+        load_model("model.pt")
+        print("Model initialized successfully.")
+    except Exception as e:
+        print(f"Error during model initialization: {e}")

@@ -25,3 +25,7 @@ torch==2.4
 torchvision==0.19
 pillow~=11.0.0
 python-multipart
+pandas
+sklearn-preprocessing
+scikit-learn
+cryptography

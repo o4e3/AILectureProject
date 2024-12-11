@@ -85,7 +85,7 @@ async def get_pet(
     pet_id: int,
     token: dict = Depends(decode_jwt_token),  # JWT 토큰 디코딩
     db: Session = Depends(get_db)
-):
+) -> PetDetailResponse:
     """
     펫 정보 조회 API
     """
