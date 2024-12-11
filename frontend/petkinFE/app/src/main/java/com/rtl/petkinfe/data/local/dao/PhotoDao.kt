@@ -18,14 +18,28 @@ interface PhotoDao {
     @Query("DELETE FROM photos")
     suspend fun deleteAllPhotos()
 
-    @Query("UPDATE photos SET predictionId = :predictionId, recordId = :recordId, " +
-            "probabilityA1 = :probA1, probabilityA2 = :probA2, probabilityA3 = :probA3, " +
-            "probabilityA4 = :probA4, probabilityA5 = :probA5, probabilityA6 = :probA6, probabilityA7 = :probA7 " +
-            "WHERE id = :id")
+    @Query("SELECT * FROM photos WHERE uri = :uri LIMIT 1")
+    suspend fun getPhotoByUri(uri: String): Photo?
+
+
+    @Query(
+        """
+        UPDATE photos 
+        SET 
+            predictionId = :predictionId,
+            probabilityA1 = :probA1,
+            probabilityA2 = :probA2,
+            probabilityA3 = :probA3,
+            probabilityA4 = :probA4,
+            probabilityA5 = :probA5,
+            probabilityA6 = :probA6,
+            probabilityA7 = :probA7
+        WHERE uri = :uri
+        """
+    )
     suspend fun updatePhoto(
-        id: Int,
-        predictionId: String?,
-        recordId: String?,
+        uri: String,
+        predictionId: Long?,
         probA1: Float?,
         probA2: Float?,
         probA3: Float?,

@@ -9,7 +9,6 @@ class GetMyPetsUseCase @Inject constructor(
     private val petRepository: PetRepository
 ) {
     suspend operator fun invoke(): Pet {
-        Log.d("펫등록", "펫 정보 확인")
         val petList = petRepository.getMyPetList()
         Log.d("펫등록", petList.toString())
         // MVP 에서는 가장 최신의 펫만 가져온다.

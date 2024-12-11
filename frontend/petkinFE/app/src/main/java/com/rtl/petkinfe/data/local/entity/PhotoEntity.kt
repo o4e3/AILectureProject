@@ -5,10 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "photos")
 data class Photo(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val uri: String,
-    val predictionId: String? = null, // 서버에서 받은 prediction_id
-    val recordId: String? = null, // 서버에서 받은 record_id
+    val predictionId: Long? = null, // 서버에서 받은 prediction_id
+    val recordId: Long? = null, // 서버에서 받은 record_id
     val probabilityA1: Float? = null, // A1 확률값
     val probabilityA2: Float? = null, // A2 확률값
     val probabilityA3: Float? = null, // A3 확률값

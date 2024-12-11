@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rtl.petkinfe.domain.model.HealthRecord
 import com.rtl.petkinfe.domain.model.ItemType
+import com.rtl.petkinfe.domain.model.Prediction
 import com.rtl.petkinfe.domain.usecases.GetTodayRecordUseCase
+import com.rtl.petkinfe.domain.usecases.RequestPredictionUseCase
 import com.rtl.petkinfe.domain.usecases.SavePhotoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTodayRecordUseCase: GetTodayRecordUseCase,
-    private val savePhotoUseCase: SavePhotoUseCase
+    private val savePhotoUseCase: SavePhotoUseCase,
+    private val requestPredictionUseCase: RequestPredictionUseCase
 ) : ViewModel() {
 
     private val _uiState = mutableStateOf(HomeUIState())
@@ -72,14 +75,32 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun requestPrediction() {
+        viewModelScope.launch {
+            try {
+                // 예측 결과를 요청하고 반환
+                val prediction = requestPredictionUseCase.execute(File(_uiState.value.cardStates[ItemType.PHOTO]?.photoUrl!!))
 
+                // 반환된 예측 데이터를 CardState에 업데이트
+                _uiState.value = _uiState.value.copy(
+                    cardStates = _uiState.value.cardStates.toMutableMap().apply {
+                        val currentState = this[ItemType.PHOTO] ?: return@apply
+                        this[ItemType.PHOTO] = currentState.copy(prediction = prediction)
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Prediction request failed: ${e.message}", e)
+            }
+        }
+    }
 }
 
 
 data class CardState(
     val isExpanded: Boolean = false, // 카드 확장 상태
     val isPhotoUploaded: Boolean = false, // 사진 업로드 여부
-    val photoUrl: String? = null // 사진 URL 추가
+    val photoUrl: String? = null, // 사진 URL 추가
+    val prediction: Prediction? = null // 예측 결과 추가
 )
 
 
