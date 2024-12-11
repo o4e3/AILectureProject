@@ -5,8 +5,7 @@ import com.rtl.petkinfe.domain.model.PredictionDetail
 import java.io.File
 
 interface PredictionRepository {
-    fun requestPrediction(petId: Long, imageFile: File): Prediction
+    suspend fun requestPrediction(petId: Long, imageFile: File): Prediction
     fun getPredictionById(analysisId: Long): PredictionDetail
-
     suspend fun savePhoto(imageFile: File): String
 }

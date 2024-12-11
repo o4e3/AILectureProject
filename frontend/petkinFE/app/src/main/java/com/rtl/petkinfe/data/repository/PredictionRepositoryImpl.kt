@@ -2,17 +2,22 @@ package com.rtl.petkinfe.data.repository
 
 import com.rtl.petkinfe.data.local.dao.PhotoDao
 import com.rtl.petkinfe.data.local.entity.Photo
+import com.rtl.petkinfe.data.mapper.toDomain
+import com.rtl.petkinfe.data.remote.api.PredictionApi
 import com.rtl.petkinfe.domain.model.Prediction
 import com.rtl.petkinfe.domain.model.PredictionDetail
 import com.rtl.petkinfe.domain.repository.PredictionRepository
+import com.rtl.petkinfe.utils.createImagePart
 import java.io.File
 import javax.inject.Inject
 
 class PredictionRepositoryImpl @Inject constructor(
-    private val photoDao: PhotoDao
+    private val photoDao: PhotoDao,
+    private val predictionApi: PredictionApi
 ): PredictionRepository {
-    override fun requestPrediction(petId: Long, imageFile: File): Prediction {
-        TODO("Not yet implemented")
+    override suspend fun requestPrediction(petId: Long, imageFile: File): Prediction {
+        val predictionResponseDto = predictionApi.requestDiseasePrediction(petId, createImagePart(imageFile))
+        return predictionResponseDto.toDomain()
     }
 
     override fun getPredictionById(analysisId: Long): PredictionDetail {

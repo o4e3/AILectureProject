@@ -48,12 +48,14 @@ import com.rtl.petkinfe.ui.theme.SplashBackgroundColor
 fun CardContent(
     title: String,
     memo: String?,
-    photoUrl: String?, // URL 표시
-    onPhotoUpload: (() -> Unit) ,
+    cardState: CardState,
+    onPhotoUpload: (() -> Unit),
 ) {
+    val photoUrl = cardState.photoUrl
+
     Column(modifier = Modifier.padding(16.dp)) {
         if (title == "피부 질환 검사") {
-            PhotoContent(photoUrl, onPhotoUpload)
+            PhotoContent(photoUrl, onPhotoUpload, cardState = cardState)
         } else {
             GeneralCardContent(memo)
         }
@@ -64,7 +66,8 @@ fun CardContent(
 fun PhotoContent(
     photoUrl: String?,
     onPhotoUpload: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    cardState: CardState
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -83,9 +86,10 @@ fun PhotoContent(
                 modifier = Modifier.size(200.dp),
                 contentScale = ContentScale.Crop
             )
+            Spacer(modifier = Modifier.height(12.dp))
             UploadCameraButton(onClick = onPhotoUpload, buttonText = "사진 변경")
             Spacer(modifier = Modifier.height(24.dp))
-            RequestPredictionButton(onClick = { viewModel.requestPrediction(ItemType.PHOTO)  }, onActive = true)
+            RequestPredictionButton(onClick = { viewModel.requestPrediction() }, onActive = true)
         } else {
             Text(
                 "사진이 없습니다",
@@ -97,6 +101,52 @@ fun PhotoContent(
             // 알림창으로 '사진을 등록해주세요' 메시지 표시
             RequestPredictionButton(onClick = { /* TODO */ }, onActive = false)
         }
+
+        // 예측 결과 표시
+        cardState.prediction?.let { prediction ->
+            Spacer(modifier = Modifier.height(16.dp))
+            val diseaseMapping = listOf(
+                "구진/플라크",
+                "비듬/각질/상피성잔고리",
+                "태선화 과다색소침착",
+                "농포/여드름",
+                "미란/궤양",
+                "결정/종괴",
+                "무증상"
+            )
+
+            diseaseMapping.forEachIndexed { index, disease ->
+                val probability = when (index) {
+                    0 -> prediction.A1
+                    1 -> prediction.A2
+                    2 -> prediction.A3
+                    3 -> prediction.A4
+                    4 -> prediction.A5
+                    5 -> prediction.A6
+                    6 -> prediction.A7
+                    else -> 0f
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = disease, style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = String.format("%.2f", probability),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "예측 결과: ${prediction.predictedClassLabel}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+
+        }
+
     }
 }
 
@@ -113,7 +163,7 @@ fun RequestPredictionButton(
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable(enabled = onActive, onClick = onClick) // 활성 상태에 따라 클릭 가능 여부 설정
-                ,
+        ,
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -221,9 +271,11 @@ fun HeaderActionButtons(
         title == "피부 질환 검사" -> {
             ToggleButton(isExpanded, onToggle)
         }
+
         memo == null -> {
             AddRecordButton(onClick = onAddRecord)
         }
+
         else -> {
             ToggleButton(isExpanded, onToggle)
         }
@@ -301,13 +353,18 @@ fun ExpandableCard(
                 .background(color)
                 .padding(12.dp)
         ) {
-            CardHeader(title = title, isExpanded = state.isExpanded, memo = memo, onToggle = onToggle, onAddRecord = { TODO() })
+            CardHeader(
+                title = title,
+                isExpanded = state.isExpanded,
+                memo = memo,
+                onToggle = onToggle,
+                onAddRecord = { TODO() })
             if (state.isExpanded) {
                 CardContent(
                     title = title,
                     memo = memo,
-                    photoUrl = photoUrl, // URL 전달
-                    onPhotoUpload = onPhotoUpload // 기본값 제공
+                    onPhotoUpload = onPhotoUpload, // 기본값 제공
+                    cardState = state
                 )
             }
         }
