@@ -221,12 +221,33 @@ async def predict_api(
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
 
-        image_filename = f"{pet_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.jpg"
-        image_path = os.path.join("static/uploads", image_filename)  # 저장 경로
+        # 업로드된 파일의 확장자를 추출
+        file_extension = os.path.splitext(image.filename)[1].lower()  # 확장자 추출
 
-        with open(image_path, "wb") as f:
-            f.write(image.file.read())
-        image_url = f"/static/uploads/{image_filename}"
+        # 유효한 이미지 확장자인지 확인
+        valid_extensions = {".jpg", ".jpeg", ".png", ".webp"}  # 지원하는 확장자 목록
+        if file_extension not in valid_extensions:
+            raise HTTPException(status_code=400, detail="Unsupported file extension. Use jpg, jpeg, png, or webp.")
+
+        # 파일명 생성
+        image_filename = f"{pet_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}{file_extension}"
+        image_path = os.path.join(upload_dir, image_filename)  # 저장 경로
+
+        # with open(image_path, "wb") as f:
+        #     f.write(image.file.read())
+        # image_url = f"/static/uploads/{image_filename}"
+        # 이미지 저장
+        try:
+            from PIL import Image
+
+            # `Pillow`를 이용한 이미지 변환 및 저장
+            pil_image = Image.open(image.file).convert("RGB")  # `webp` 포함 모든 파일을 RGB로 변환
+            pil_image.save(image_path, format=file_extension[1:].upper())  # 확장자에 맞는 형식으로 저장
+
+            # 저장된 이미지 URL 생성
+            image_url = f"/static/uploads/{image_filename}"
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to process the image: {str(e)}")
 
 
         # 가장 높은 클래스 인덱스 및 이름 가져오기
@@ -338,7 +359,7 @@ def save_prediction_to_db(session: Session, pet_id, model_name, probabilities, i
     return analysis_id
 
 
-@router.get("/records/{pet_id}")
+@router.get("/predict/{pet_id}")
 async def get_records_by_pet_and_date(
     pet_id: int,
     date: str,  # YYYY-MM-DD 형식의 날짜를 쿼리 파라미터로 받음
@@ -375,10 +396,7 @@ async def get_records_by_pet_and_date(
 
         # 결과 확인
         if not records:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No records found for pet_id {pet_id} on {date}."
-            )
+            return {"predictions": []}
 
         # JSON 응답 생성
         response = [
@@ -393,7 +411,7 @@ async def get_records_by_pet_and_date(
             for record in records
         ]
 
-        return {"records": response}
+        return {"predictions": response}
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
@@ -401,3 +419,48 @@ async def get_records_by_pet_and_date(
         print(f"Error while retrieving records: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve records: {str(e)}")
 
+
+@router.get("/predict-detail/{analysis_id}")
+async def get_result_detail_by_analysis_id(
+    analysis_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    특정 analysis_id를 기준으로 AIResult를 조회합니다.
+    :param analysis_id: AIResult의 ID (path parameter)
+    :param db: 데이터베이스 세션 (Dependency)
+    """
+    try:
+        # AIResult 검색
+        ai_result = db.query(AIResult).filter(AIResult.analysis_id == analysis_id).first()
+
+
+        # 결과 확인
+        if not ai_result:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No result found for analysis_id {analysis_id}."
+            )
+
+        # JSON 응답 생성
+        response = {
+            "analysis_id": ai_result.analysis_id,
+            "model_name": ai_result.model_name,
+            "accuracy": ai_result.accuracy,
+            "A1": ai_result.A1,
+            "A2": ai_result.A2,
+            "A3": ai_result.A3,
+            "A4": ai_result.A4,
+            "A5": ai_result.A5,
+            "A6": ai_result.A6,
+            "A7": ai_result.A7,
+        }
+
+        return response
+
+    except Exception as e:
+        print(f"Error while retrieving AIResult: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve AIResult: {str(e)}"
+        )
