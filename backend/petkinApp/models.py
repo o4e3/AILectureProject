@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import DateTime, Text
 from petkinApp.database import Base
-from sqlalchemy import Column, BigInteger, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Float, BigInteger, Integer, String, Boolean, ForeignKey
 
 class HealthRecord(Base):
     __tablename__ = 'HealthRecord'
@@ -31,3 +31,27 @@ class Pets(Base):
     gender = Column(String(10), nullable=False)  # M, F
     registration_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     owner_id = Column(BigInteger, ForeignKey('Customers.customer_id'), nullable=False)
+
+
+class AIResult(Base):
+    __tablename__ = 'AIResult'
+    analysis_id = Column(BigInteger, primary_key=True, autoincrement=True)  # Auto Increment
+    model_name = Column(String(255), nullable=True)
+    accuracy = Column(Float, nullable=True)  # Model accuracy
+    analysis_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+    A1 = Column(Float, nullable=False)
+    A2 = Column(Float, nullable=False)
+    A3 = Column(Float, nullable=False)
+    A4 = Column(Float, nullable=False)
+    A5 = Column(Float, nullable=False)
+    A6 = Column(Float, nullable=False)
+    A7 = Column(Float, nullable=False)
+
+class DiseasePredictionRecord(Base):
+    __tablename__ = "DiseasePredictionRecord"
+    record_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    pet_id = Column(BigInteger, ForeignKey("pets.pet_id"), nullable=False)
+    disease_id = Column(BigInteger, nullable=False)  # 연결된 라벨
+    analysis_id = Column(BigInteger, ForeignKey("AIResult.analysis_id"), nullable=False)
+    image_url = Column(String(255), nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)

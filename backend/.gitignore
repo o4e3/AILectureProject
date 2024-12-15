@@ -17,6 +17,10 @@
 .idea/**/dictionaries
 .idea/**/shelf
 
+/static/uploads
+
+./*.pyc
+__pycache__
 # AWS User-specific
 .idea/**/aws.xml
 
@@ -249,6 +253,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+model.pt
 
 # Spyder project settings
 .spyderproject

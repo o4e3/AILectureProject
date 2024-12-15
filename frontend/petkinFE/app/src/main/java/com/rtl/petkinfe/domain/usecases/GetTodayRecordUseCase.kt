@@ -16,11 +16,6 @@ class GetTodayRecordUseCase @Inject constructor(
                 memo = "https://example.com/photo.jpg" // URL 메모
             ),
             HealthRecord(
-                recordId = 2,
-                itemType = ItemType.BATH,
-                memo = "목욕 완료"
-            ),
-            HealthRecord(
                 recordId = 3,
                 itemType = ItemType.WALK,
                 memo = "30분 산책"
