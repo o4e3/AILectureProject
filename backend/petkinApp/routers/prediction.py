@@ -203,12 +203,6 @@ async def predict_api(
         image_tensor = image_transform(image.file)
         print(f"Input tensor shape: {image_tensor.shape}")
 
-        # # 추가 특징 처리
-        # if request and request.additional_features:
-        #     additional_features_tensor = torch.tensor(request.additional_features, dtype=torch.float32).unsqueeze(0)
-        # else:
-        #     raise HTTPException(status_code=400, detail="Additional features are required.")
-
         # 모델 예측
         with torch.no_grad():
             logits = model(image_tensor, additional_features_tensor)
@@ -233,10 +227,6 @@ async def predict_api(
         image_filename = f"{pet_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}{file_extension}"
         image_path = os.path.join(upload_dir, image_filename)  # 저장 경로
 
-        # with open(image_path, "wb") as f:
-        #     f.write(image.file.read())
-        # image_url = f"/static/uploads/{image_filename}"
-        # 이미지 저장
         try:
             from PIL import Image
 
@@ -248,7 +238,6 @@ async def predict_api(
             image_url = f"/static/uploads/{image_filename}"
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to process the image: {str(e)}")
-
 
         # 가장 높은 클래스 인덱스 및 이름 가져오기
         class_mapping = {
@@ -265,7 +254,6 @@ async def predict_api(
 
         # 모델 이름 (예: EfficientNet)
         model_name = "MultimodalModel-EfficientNetB0"
-
         # 결과를 데이터베이스에 저장
         analysis_id = save_prediction_to_db(
             session=db,
@@ -274,7 +262,6 @@ async def predict_api(
             probabilities=probabilities,
             image_url=image_url
         )
-
         # JSON 형식으로 결과 반환
         response = {
             "analysis_id": analysis_id,
