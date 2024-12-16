@@ -1,0 +1,26 @@
+version: "3.11"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: FastAPI
+    ports:
+      - "8080:8080"
+    env_file: .env
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: mysql:8.0
+    container_name: mysql9010
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./Dump20241216:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: rhaxod0820
+      MYSQL_DATABASE: petkin_db
+    restart: always

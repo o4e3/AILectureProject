@@ -30,3 +30,6 @@ pandas
 sklearn-preprocessing
 scikit-learn
 cryptography
+gunicorn
+gdown
+httpx

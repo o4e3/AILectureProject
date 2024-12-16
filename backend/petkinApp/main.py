@@ -15,6 +15,7 @@ app.include_router(pets.router, prefix="/api", tags=["pets-controller"])
 app.include_router(prediction.router, prefix="/api", tags=["prediction-controller"])
 app.include_router(health_records.router, prefix="/api", tags=["health-records-controller"])
 
+
 # OpenAPI 스키마 수정
 def custom_openapi():
     if app.openapi_schema:
@@ -52,6 +53,7 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
+
 # 모델 로드
 @app.on_event("startup")
 async def startup_event():
@@ -63,3 +65,8 @@ async def startup_event():
         print("Model initialized successfully.")
     except Exception as e:
         print(f"Error during model initialization: {e}")
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
