@@ -5,14 +5,16 @@ import com.google.gson.annotations.SerializedName
 data class HealthRecordResponse(
     @SerializedName("record_id")
     val recordId: Long,
-    @SerializedName("pet_id")
+    @SerializedName("item_id")
     val itemId: Int,
     val memo: String,
     val timestamp: String
 )
 
 data class HealthRecordByMonthResponse(
+    @SerializedName("record_id")
     val recordId: Long,
+    @SerializedName("item_id")
     val itemId: Int,
     val date: String // ISO 8601 형식 (예: YYYY-MM-DD)
 )
@@ -23,6 +25,7 @@ data class ErrorResponse(
 )
 
 data class UpdateHealthRecordRequest(
+    @SerializedName("item_id")
     val itemId: Int,
     val memo: String,
     val timestamp: String
@@ -40,5 +43,6 @@ data class CreateHealthRecordRequest(
 
 // Response DTO for creating a health record
 data class CreateHealthRecordResponse(
+    @SerializedName("record_id")
     val recordId: Long
 )

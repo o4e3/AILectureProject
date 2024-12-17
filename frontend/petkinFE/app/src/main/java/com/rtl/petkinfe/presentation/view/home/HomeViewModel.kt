@@ -40,11 +40,14 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadRecords() {
-        val records = getTodayRecordUseCase.execute()
-        val cardStates = records.associate { it.itemType to CardState() }
-        _uiState.value = HomeUIState(records = records, cardStates = cardStates)
-        // 아이콘 상태 초기화
-        initializeIconStates(records)
+        viewModelScope.launch {
+            val records = getTodayRecordUseCase.execute() ?: emptyList()
+            val cardStates = records.associate { it.itemType to CardState() }
+            _uiState.value = HomeUIState(records = records, cardStates = cardStates)
+            // 아이콘 상태 초기화
+            initializeIconStates(records)
+            Log.d("ViewModel", "Loaded records: $records")
+        }
     }
 
     private fun loadPrediction() {
@@ -67,6 +70,7 @@ class HomeViewModel @Inject constructor(
         )
     }
 
+
     private fun initializeIconStates(records: List<HealthRecord>) {
         val activeIcons = records.map { it.itemType }.toSet()
         val allIcons = ItemType.values().associateWith { it in activeIcons }
@@ -76,11 +80,13 @@ class HomeViewModel @Inject constructor(
     fun toggleCard(itemType: ItemType) {
         _uiState.value = _uiState.value.copy(
             cardStates = _uiState.value.cardStates.toMutableMap().apply {
-                val currentState = this[itemType] ?: return@apply // null인 경우 반환
+                val currentState = this[itemType] ?: CardState()
                 this[itemType] = currentState.copy(isExpanded = !currentState.isExpanded)
             }
         )
     }
+
+
 
     // 사진 업로드 처리
     fun uploadPhoto(itemType: ItemType, imageFile: File) {
@@ -132,6 +138,8 @@ class HomeViewModel @Inject constructor(
 
                 // 성공 메시지 처리
                 _uiState.value = _uiState.value.copy(message = "기록이 성공적으로 추가되었습니다.")
+                loadRecords() // 기록 새로고침
+
             } catch (e: Exception) {
                 Log.e("AddRecord", "Error adding record", e)
                 _uiState.value = _uiState.value.copy(message = "기록 추가 중 오류가 발생했습니다.")
@@ -151,6 +159,7 @@ data class CardState(
     val photoUrl: String? = null, // 사진 URL 추가
     val prediction: Prediction? = null // 예측 결과 추가
 )
+
 
 
 data class HomeUIState(

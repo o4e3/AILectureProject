@@ -131,12 +131,11 @@ fun ExpandableCardSection(
             .fillMaxWidth()
             .background(Color.White)
     ) {
-        // 모든 ItemType에 대해 처리
         items(ItemType.values().toList()) { itemType ->
-            val record = uiState.records.find { it.itemType == itemType }
+            // item_id와 itemType.id를 비교하여 record 찾기
+            val record = uiState.records.find { it.itemType == ItemType.fromId(itemType.id) }
             val state = uiState.cardStates[itemType] ?: CardState()
-            val backgroundColor =
-                ItemTypeColors.backgroundColors[itemType] ?: Color.LightGray
+            val backgroundColor = ItemTypeColors.backgroundColors[itemType] ?: Color.LightGray
             val title = ItemTypeTitles.titles[itemType] ?: "기타"
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -150,8 +149,8 @@ fun ExpandableCardSection(
                 title = title,
                 color = backgroundColor,
                 state = state,
-                memo = record?.memo, // 기록이 없는 경우 null
-                photoUrl = state.photoUrl, // 기본 URL 처리
+                memo = record?.memo, // 기록이 있는 경우 memo 전달
+                photoUrl = state.photoUrl,
                 onToggle = { onToggle(itemType) },
                 onPhotoUpload = if (itemType == ItemType.PHOTO) onPhotoUpload else ({})
             )

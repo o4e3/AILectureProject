@@ -22,8 +22,7 @@ interface HealthRecordApi {
         @Path("pet_id") petId: Long
     ): List<HealthRecordResponse>
 
-    // 특정 날짜의 건강 기록 조회
-    @GET("/api/pets/{pet_id}/health-records")
+    @GET("/api/pets/{pet_id}/health-records/date")
     suspend fun getHealthRecordsByDate(
         @Path("pet_id") petId: Long,
         @Query("date") date: String // YYYY-MM-DD 형식의 날짜
