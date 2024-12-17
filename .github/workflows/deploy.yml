@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # main 브랜치에 푸시될 때 실행
+      - main
 
 jobs:
   build-and-deploy:
@@ -14,12 +14,20 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Docker 이미지 빌드
+      # 2. .env 파일 생성
+      - name: Create .env file
+        run: |
+          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" > .env
+          echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+
+      # 3. Docker 이미지 빌드
       - name: Build Docker Image
         run: |
           docker build -t backend_server ./backend
 
-      # 3. 서버에 코드 및 이미지 전송
+      # 4. 서버에 코드 전송 및 배포
       - name: Deploy to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -29,8 +37,8 @@ jobs:
           source: "./*"
           target: "/home/ubuntu/backend"
 
-      # 4. 서버에서 .env 파일 생성
-      - name: Create .env file on EC2
+      # 5. 서버에서 .env 파일 생성 및 Docker 실행
+      - name: SSH into EC2 and restart Docker Compose
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -42,15 +50,5 @@ jobs:
             echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
             echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-
-      # 5. 서버에서 Docker Compose 실행
-      - name: SSH into EC2 and restart Docker Compose
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/backend
             docker-compose down
             docker-compose up -d --build
