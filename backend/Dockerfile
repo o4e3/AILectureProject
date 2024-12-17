@@ -20,8 +20,8 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # 애플리케이션 및 기타 파일 복사
 COPY ./petkinApp /app/petkinApp
-COPY ./model.pt /app/model.pt
-COPY ./static /app/static
+#COPY ./model.pt /app/model.pt
+#COPY ./static /app/static
 # COPY .env /app/.env
 
 
