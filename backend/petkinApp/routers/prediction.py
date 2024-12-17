@@ -25,27 +25,6 @@ router = APIRouter(prefix="/ai")
 model = None
 
 
-# 사용자 정의 모델 클래스 정의 (기존)
-# class MultimodalModel(nn.Module):
-#     def __init__(self, image_model, output_dim):
-#         super(MultimodalModel, self).__init__()
-#
-#         self.image_model = image_model
-#
-#         # 추가 특징을 처리하는 MLP
-#         self.fc_additional = nn.Sequential(
-#             nn.Linear(0, 64),  # 나중에 forward에서 동적으로 설정
-#             nn.ReLU(),
-#             nn.Linear(64, 64)
-#         )
-#
-#         # 이미지 특징과 추가 feature 결합 후 예측하는 fully connected layer
-#         self.fc_combined = nn.Sequential(
-#             nn.Linear(1000 + 64, 128),
-#             nn.ReLU(),
-#             nn.Linear(128, output_dim)
-#         )
-
 class MultimodalModel(nn.Module):
     def __init__(self, image_model, additional_input_dim, output_dim):
         super(MultimodalModel, self).__init__()
@@ -84,11 +63,13 @@ def download_model_from_google_drive(file_id, output_path):
     url = f"https://drive.google.com/uc?id={file_id}"
     gdown.download(url, output_path, quiet=False)
 
+
 # 모델 초기화 및 저장
 def initialize_model_and_save(model_path="model.pt"):
     global model
     additional_input_dim = 3  # 입력 피처 크기
-    model = MultimodalModel(image_model=models.efficientnet_b0(pretrained=True), additional_input_dim=additional_input_dim, output_dim=7)
+    model = MultimodalModel(image_model=models.efficientnet_b0(pretrained=True),
+                            additional_input_dim=additional_input_dim, output_dim=7)
     print("Model initialized.")
 
     # 모델 저장
@@ -103,14 +84,14 @@ def load_model(model_path="model.pt"):
         # 모델 파일이 없으면 Google Drive에서 다운로드
         if not os.path.exists(model_path):
             print(f"{model_path} not found. Downloading from Google Drive...")
-            download_model_from_google_drive(file_id="1GinzADjdLuuGDpOC4TXABVSpBp0ec7I4", output_path=model_path)
+            download_model_from_google_drive(file_id="1vF5oXignqWuLBE7uQUthx4sTc8w4RydA", output_path=model_path)
 
         # 모델 로드
         print("Loading model...")
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # 모델 객체 초기화
-        #model = MultimodalModel(image_model=models.efficientnet_b0(pretrained=True), output_dim=7)
+        # model = MultimodalModel(image_model=models.efficientnet_b0(pretrained=True), output_dim=7)
 
         additional_input_dim = 3  # 입력 피처 크기
         model = MultimodalModel(models.efficientnet_b0(pretrained=True), additional_input_dim, 7)
@@ -126,6 +107,7 @@ def load_model(model_path="model.pt"):
         print(f"Error during model loading: {e}")
         raise HTTPException(status_code=500, detail=f"Model loading failed: {str(e)}")
 
+
 # 이미지 전처리 함수
 def image_transform(image):
     transform = transforms.Compose(
@@ -137,6 +119,7 @@ def image_transform(image):
     )
     image = Image.open(image).convert("RGB")
     return transform(image).unsqueeze(0)
+
 
 def preprocess_dataframe(df):
     """
@@ -158,6 +141,7 @@ def preprocess_dataframe(df):
     df = df.astype('float32')
     return df
 
+
 async def get_latest_pet_info():
     """Fetch the latest pet information from the /mine API"""
     async with AsyncClient() as client:
@@ -170,7 +154,6 @@ async def get_latest_pet_info():
             return latest_pet
         else:
             raise HTTPException(status_code=response.status_code, detail="Failed to fetch pet information.")
-
 
 
 @router.post("/predict/{pet_id}")
@@ -241,13 +224,13 @@ async def predict_api(
 
         # 가장 높은 클래스 인덱스 및 이름 가져오기
         class_mapping = {
-                0: "A1 구진/플라크",
-                1: "A2 비듬/각질/상피성잔고리",
-                2: "A3 태선화 과다색소침착",
-                3: "A4 농포/여드름",
-                4: "A5 미란/궤양",
-                5: "A6 결정/종괴",
-                6: "A7 무증상"
+            0: "A1 구진/플라크",
+            1: "A2 비듬/각질/상피성잔고리",
+            2: "A3 태선화 과다색소침착",
+            3: "A4 농포/여드름",
+            4: "A5 미란/궤양",
+            5: "A6 결정/종괴",
+            6: "A7 무증상"
         }
         predicted_class_index = torch.argmax(torch.tensor(probabilities)).item()  # 가장 높은 인덱스
         predicted_class_label = class_mapping[predicted_class_index]
@@ -348,9 +331,9 @@ def save_prediction_to_db(session: Session, pet_id, model_name, probabilities, i
 
 @router.get("/predict/{pet_id}")
 async def get_records_by_pet_and_date(
-    pet_id: int,
-    date: str,  # YYYY-MM-DD 형식의 날짜를 쿼리 파라미터로 받음
-    db: Session = Depends(get_db)
+        pet_id: int,
+        date: str,  # YYYY-MM-DD 형식의 날짜를 쿼리 파라미터로 받음
+        db: Session = Depends(get_db)
 ):
     """
     특정 pet_id와 날짜를 기준으로 DiseasePredictionRecord를 조회합니다.
@@ -368,6 +351,9 @@ async def get_records_by_pet_and_date(
         # 시작 및 종료 범위 설정 (해당 날짜의 00:00:00부터 23:59:59까지)
         start_datetime = datetime.combine(date_obj, datetime.min.time())
         end_datetime = datetime.combine(date_obj, datetime.max.time())
+
+        # KST 시간대 설정
+        kst_timezone = timezone('Asia/Seoul')
 
         # 쿼리 실행
         print(f"Querying records for pet_id={pet_id} between {start_datetime} and {end_datetime}")
@@ -393,7 +379,7 @@ async def get_records_by_pet_and_date(
                 "disease_id": record.disease_id,
                 "analysis_id": record.analysis_id,
                 "image_url": record.image_url,
-                "timestamp": record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                "timestamp": record.timestamp.astimezone(kst_timezone).strftime("%Y-%m-%d %H:%M:%S")
             }
             for record in records
         ]
@@ -409,8 +395,8 @@ async def get_records_by_pet_and_date(
 
 @router.get("/predict-detail/{analysis_id}")
 async def get_result_detail_by_analysis_id(
-    analysis_id: int,
-    db: Session = Depends(get_db)
+        analysis_id: int,
+        db: Session = Depends(get_db)
 ):
     """
     특정 analysis_id를 기준으로 AIResult를 조회합니다.
@@ -420,7 +406,6 @@ async def get_result_detail_by_analysis_id(
     try:
         # AIResult 검색
         ai_result = db.query(AIResult).filter(AIResult.analysis_id == analysis_id).first()
-
 
         # 결과 확인
         if not ai_result:

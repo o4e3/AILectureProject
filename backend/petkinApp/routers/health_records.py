@@ -1,12 +1,14 @@
 from fastapi import Depends, HTTPException, APIRouter, status, Path, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import Date, extract
+from sqlalchemy import Date, extract, func
 from datetime import datetime
 from petkinApp.models import HealthRecord  # HealthRecord 모델
-from petkinApp.schemas.health_records import HealthRecordCreateRequest, HealthRecordCreateResponse, HealthRecordDetailResponse, HealthRecordDetailByDateResponse, HealthRecordDetailByMonthResponse
+from petkinApp.schemas.health_records import HealthRecordCreateRequest, HealthRecordCreateResponse, \
+    HealthRecordDetailResponse, HealthRecordDetailByDateResponse, HealthRecordDetailByMonthResponse
 from petkinApp.database import get_db
 from petkinApp.security import decode_jwt_token  # JWT 인증 처리
 import pytz
+from pytz import timezone
 
 """
 이 파일은 health-record-controller 를 위한 파일로 API 의 health-record 부분에 해당하는 API 를 구현합니다.
@@ -15,11 +17,12 @@ import pytz
 # 라우터 설정
 router = APIRouter(tags=["health-records-controller"])
 
+
 @router.post("/health-records", response_model=HealthRecordCreateResponse, status_code=status.HTTP_201_CREATED)
 async def create_health_record(
-    request: HealthRecordCreateRequest,
-    token: dict = Depends(decode_jwt_token),  # JWT 인증
-    db: Session = Depends(get_db),
+        request: HealthRecordCreateRequest,
+        token: dict = Depends(decode_jwt_token),  # JWT 인증
+        db: Session = Depends(get_db),
 ):
     """
     건강 기록 생성 API
@@ -47,11 +50,12 @@ async def create_health_record(
     # 응답 반환
     return HealthRecordCreateResponse(record_id=new_record.record_id)
 
+
 @router.get("/health-records/{record_id}", response_model=HealthRecordDetailResponse, status_code=200)
 async def get_health_record(
-    record_id: int,
-    token: dict = Depends(decode_jwt_token),  # JWT 인증
-    db: Session = Depends(get_db)
+        record_id: int,
+        token: dict = Depends(decode_jwt_token),  # JWT 인증
+        db: Session = Depends(get_db)
 ):
     """
     건강 기록 조회 API
@@ -69,12 +73,14 @@ async def get_health_record(
         timestamp=record.timestamp,
     )
 
-@router.get("/pets/{pet_id}/health-records/date", response_model=list[HealthRecordDetailByDateResponse], status_code=200)
+
+@router.get("/pets/{pet_id}/health-records/date", response_model=list[HealthRecordDetailByDateResponse],
+            status_code=200)
 async def get_health_records_by_date(
-    pet_id: int = Path(..., gt=0, description="반려동물의 ID"),
-    date: str = Query(..., description="조회할 날짜 (YYYY-MM-DD) 형식"),
-    token: dict = Depends(decode_jwt_token),
-    db: Session = Depends(get_db),
+        pet_id: int = Path(..., gt=0, description="반려동물의 ID"),
+        date: str = Query(..., description="조회할 날짜 (YYYY-MM-DD) 형식"),
+        token: dict = Depends(decode_jwt_token),
+        db: Session = Depends(get_db),
 ):
     """
     특정 날짜의 반려동물 건강 기록 조회 API
@@ -93,21 +99,21 @@ async def get_health_records_by_date(
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-    # DB에서 해당 반려동물 ID와 날짜에 해당하는 건강 기록 조회
+    # KST 시간대 설정
+    kst_timezone = timezone('Asia/Seoul')
+    start_datetime = datetime.combine(parsed_date, datetime.min.time())
+    end_datetime = datetime.combine(parsed_date, datetime.max.time())
+
+    # DB에서 KST 시간대 변환 후 날짜 필터링
     records = (
         db.query(HealthRecord)
         .filter(
             HealthRecord.pet_id == pet_id,
-            HealthRecord.timestamp.cast(Date) == parsed_date.date(),  # SQLAlchemy 날짜 필터링
+            HealthRecord.timestamp >= start_datetime,
+            HealthRecord.timestamp <= end_datetime
         )
         .all()
     )
-
-    if not records:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No health records found for the given pet and date",
-        )
 
     # 응답 반환
     return [
@@ -115,17 +121,19 @@ async def get_health_records_by_date(
             record_id=record.record_id,
             item_id=record.item_id,
             memo=record.memo,
-            timestamp=record.timestamp.strftime("%Y-%m-%d"),
+            timestamp=record.timestamp.astimezone(kst_timezone).strftime("%Y-%m-%d"),
         )
         for record in records
     ]
 
-@router.get("/pets/{pet_id}/health-records/month", response_model=list[HealthRecordDetailByMonthResponse], status_code=200)
+
+@router.get("/pets/{pet_id}/health-records/month", response_model=list[HealthRecordDetailByMonthResponse],
+            status_code=200)
 async def get_health_records_by_month(
-    pet_id: int = Path(..., gt=0, description="반려동물의 ID"),
-    month: str = Query(..., description="조회할 월 (YYYY-MM) 형식"),
-    token: dict = Depends(decode_jwt_token),
-    db: Session = Depends(get_db),
+        pet_id: int = Path(..., gt=0, description="반려동물의 ID"),
+        month: str = Query(..., description="조회할 월 (YYYY-MM) 형식"),
+        token: dict = Depends(decode_jwt_token),
+        db: Session = Depends(get_db),
 ):
     """
     특정 달의 반려동물 건강 기록 조회 API
@@ -144,29 +152,33 @@ async def get_health_records_by_month(
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
+    # KST 시간대 설정
+    kst_timezone = timezone('Asia/Seoul')
+
+    # 해당 월의 시작일과 종료일 설정
+    start_date = datetime(parsed_date.year, parsed_date.month, 1, tzinfo=kst_timezone)
+    if parsed_date.month == 12:
+        end_date = datetime(parsed_date.year + 1, 1, 1, tzinfo=kst_timezone)
+    else:
+        end_date = datetime(parsed_date.year, parsed_date.month + 1, 1, tzinfo=kst_timezone)
+
     # DB에서 해당 반려동물 ID와 월에 해당하는 건강 기록 조회
     records = (
-            db.query(HealthRecord)
-            .filter(
-                HealthRecord.pet_id == pet_id,
-                extract('year', HealthRecord.timestamp) == parsed_date.year,
-                extract('month', HealthRecord.timestamp) == parsed_date.month
-            )
-            .all()
-    )
-
-    if not records:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No health records found for the given pet and date",
+        db.query(HealthRecord)
+        .filter(
+            HealthRecord.pet_id == pet_id,
+            HealthRecord.timestamp >= start_date,
+            HealthRecord.timestamp < end_date
         )
+        .all()
+    )
 
     # 응답 반환
     return [
         HealthRecordDetailByMonthResponse(
             record_id=record.record_id,
             item_id=record.item_id,
-            date=record.timestamp.strftime("%Y-%m-%d"),
+            date=record.timestamp.astimezone(kst_timezone).strftime("%Y-%m-%d"),  # 날짜만 전달
         )
         for record in records
     ]
