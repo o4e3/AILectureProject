@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 COPY ./petkinApp /app/petkinApp
 COPY ./model.pt /app/model.pt
 COPY ./static /app/static
-COPY .env /app/.env
+# COPY .env /app/.env
 
 
 # 포트 노출
