@@ -29,7 +29,21 @@ jobs:
           source: "./*"
           target: "/home/ubuntu/backend"
 
-      # 4. 서버에서 Docker Compose 실행
+      # 4. 서버에서 .env 파일 생성
+      - name: Create .env file on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/backend
+            echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" > .env
+            echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+
+      # 5. 서버에서 Docker Compose 실행
       - name: SSH into EC2 and restart Docker Compose
         uses: appleboy/ssh-action@v1.0.0
         with:
