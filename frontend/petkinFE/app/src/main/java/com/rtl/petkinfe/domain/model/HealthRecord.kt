@@ -11,16 +11,20 @@ data class HealthRecord(
 }
 
 
-// 기록 유형 Enum 정의
-enum class ItemType {
-    PHOTO,        // 사진
-    BATH,         // 목욕
-    WALK,         // 산책
-    SNACK,        // 간식
-    MEDICINE,     // 약
-    VACCINATION,  // 접종
-    HOSPITAL,      // 병원
-    MEMO
+
+enum class ItemType(val id: Int) {
+    PHOTO(1),        // 사진
+    BATH(2),         // 목욕
+    WALK(3),         // 산책
+    SNACK(4),        // 간식
+    MEDICINE(5),     // 약
+    VACCINATION(6),  // 접종
+    HOSPITAL(7),     // 병원
+    MEMO(8);         // 메모
+
+    companion object {
+        fun fromId(id: Int): ItemType? = values().find { it.id == id }
+    }
 }
 
 object ItemTypeColors {

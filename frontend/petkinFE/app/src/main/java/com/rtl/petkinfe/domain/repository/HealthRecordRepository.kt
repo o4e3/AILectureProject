@@ -2,10 +2,11 @@ package com.rtl.petkinfe.domain.repository
 
 import com.rtl.petkinfe.domain.model.HealthRecord
 import com.rtl.petkinfe.domain.model.ItemType
+import java.time.LocalDate
 
 interface HealthRecordRepository {
     // 오늘의 전체 건강 기록 반환
-    suspend fun getTodayHealthRecord(): List<HealthRecord>
+    suspend fun getRecordByDate(petId:Long, date: LocalDate): List<HealthRecord>
 
     // 특정 기록 ID로 상세 정보 반환
     fun getRecordInfo(recordId: Long): HealthRecord

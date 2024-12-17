@@ -376,7 +376,7 @@ fun ExpandableCard(
                 title = title,
                 isExpanded = state.isExpanded,
                 memo = memo,
-                onToggle = onToggle,
+                onToggle = onToggle, // 상태 변경 추가
                 onAddRecord = { showDialog.value = true})
             if (state.isExpanded) {
                 CardContent(
@@ -455,6 +455,7 @@ fun AddRecordDialog(
                 // 한글 제목(title)을 ItemType으로 변환
                 val itemType = ItemTypeTitles.titles.entries
                     .find { it.value == title }?.key
+                Log.d("AddRecordDialog", "ItemType: $itemType")
                 if (itemType != null) {
                 onConfirm(itemType, memoInput)
             } else {
@@ -473,35 +474,3 @@ fun AddRecordDialog(
     )
 }
 
-
-@Composable
-fun DropdownMenuBox(
-    selectedType: String,
-    itemList: List<String>,
-    onItemSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-            .clickable { expanded = true }
-            .padding(12.dp)
-    ) {
-        Text(selectedType)
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            itemList.forEach { item ->
-                DropdownMenuItem(onClick = {
-                    onItemSelected(item)
-                    expanded = false
-                }) {
-                    Text(item)
-                }
-            }
-        }
-    }
-}
