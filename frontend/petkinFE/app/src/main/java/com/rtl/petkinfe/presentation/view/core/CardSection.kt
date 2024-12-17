@@ -1,5 +1,6 @@
 package com.rtl.petkinfe.presentation.view.core
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,19 +21,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,6 +54,7 @@ import com.rtl.petkinfe.BuildConfig.API_BASE_URL
 
 import com.rtl.petkinfe.R
 import com.rtl.petkinfe.domain.model.ItemType
+import com.rtl.petkinfe.domain.model.ItemTypeTitles
 import com.rtl.petkinfe.presentation.view.home.CardState
 import com.rtl.petkinfe.presentation.view.home.HomeViewModel
 import com.rtl.petkinfe.ui.theme.PhotoIconActiveColor
@@ -332,6 +346,7 @@ fun AddRecordButton(onClick: () -> Unit) {
     }
 }
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun ExpandableCard(
     title: String,
@@ -340,8 +355,10 @@ fun ExpandableCard(
     memo: String?,
     photoUrl: String?, // URL 추가
     onToggle: () -> Unit,
-    onPhotoUpload: () -> Unit // 런처 호출 콜백
+    onPhotoUpload: () -> Unit, // 런처 호출 콜백
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
+    val showDialog = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -360,7 +377,7 @@ fun ExpandableCard(
                 isExpanded = state.isExpanded,
                 memo = memo,
                 onToggle = onToggle,
-                onAddRecord = { TODO() })
+                onAddRecord = { showDialog.value = true})
             if (state.isExpanded) {
                 CardContent(
                     title = title,
@@ -370,6 +387,16 @@ fun ExpandableCard(
                 )
             }
         }
+    }
+    if (showDialog.value) {
+        AddRecordDialog(
+            title = title,
+            onDismiss = { showDialog.value = false },
+            onConfirm = { itemType, memo ->
+                viewModel.addRecord(itemType, memo)
+                showDialog.value = false
+            }
+        )
     }
 }
 
@@ -392,4 +419,89 @@ fun RenderPredictionImage(imageUrl: String) {
             .padding(8.dp),
         contentScale = ContentScale.Crop
     )
+}
+
+
+@Composable
+fun AddRecordDialog(
+    title: String,
+    onDismiss: () -> Unit,
+    onConfirm: (ItemType, String) -> Unit
+) {
+    var memoInput by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "기록 추가", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) },
+        text = {
+            Column {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "✅ 기록 종류: $title", style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(10.dp))
+                TextField(
+                    value = memoInput,
+                    onValueChange = { memoInput = it },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.White,
+                        focusedIndicatorColor = PhotoIconActiveColor,
+                    ),
+                    label = { Text("메모 입력") }
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                // 한글 제목(title)을 ItemType으로 변환
+                val itemType = ItemTypeTitles.titles.entries
+                    .find { it.value == title }?.key
+                if (itemType != null) {
+                onConfirm(itemType, memoInput)
+            } else {
+                Log.e("AddRecordDialog", "Invalid ItemType: $title")
+            }
+            }) {
+                Text("추가")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) {
+                Text("취소")
+            }
+        }
+    )
+}
+
+
+@Composable
+fun DropdownMenuBox(
+    selectedType: String,
+    itemList: List<String>,
+    onItemSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+            .clickable { expanded = true }
+            .padding(12.dp)
+    ) {
+        Text(selectedType)
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            itemList.forEach { item ->
+                DropdownMenuItem(onClick = {
+                    onItemSelected(item)
+                    expanded = false
+                }) {
+                    Text(item)
+                }
+            }
+        }
+    }
 }

@@ -11,6 +11,7 @@ import com.rtl.petkinfe.domain.model.Prediction
 import com.rtl.petkinfe.domain.usecases.GetTodayPredictionUseCase
 import com.rtl.petkinfe.domain.usecases.GetTodayRecordUseCase
 import com.rtl.petkinfe.domain.usecases.RequestPredictionUseCase
+import com.rtl.petkinfe.domain.usecases.SaveHealthRecordsUseCase
 import com.rtl.petkinfe.domain.usecases.SavePhotoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -22,7 +23,8 @@ class HomeViewModel @Inject constructor(
     private val getTodayRecordUseCase: GetTodayRecordUseCase,
     private val getTodayPredictionUseCase: GetTodayPredictionUseCase,
     private val savePhotoUseCase: SavePhotoUseCase,
-    private val requestPredictionUseCase: RequestPredictionUseCase
+    private val requestPredictionUseCase: RequestPredictionUseCase,
+    private val saveRecordUseCase: SaveHealthRecordsUseCase
 ) : ViewModel() {
 
     private val _uiState = mutableStateOf(HomeUIState())
@@ -116,6 +118,30 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+
+    fun addRecord(itemType: ItemType, memo: String) {
+        viewModelScope.launch {
+            try {
+                val newRecord = HealthRecord(
+                    recordId = null,
+                    itemType = itemType,
+                    memo = memo
+                )
+                saveRecordUseCase.invoke(newRecord)
+
+                // 성공 메시지 처리
+                _uiState.value = _uiState.value.copy(message = "기록이 성공적으로 추가되었습니다.")
+            } catch (e: Exception) {
+                Log.e("AddRecord", "Error adding record", e)
+                _uiState.value = _uiState.value.copy(message = "기록 추가 중 오류가 발생했습니다.")
+            }
+        }
+    }
+
+    fun clearMessage() {
+        _uiState.value = _uiState.value.copy(message = null)
+    }
 }
 
 
@@ -130,4 +156,5 @@ data class CardState(
 data class HomeUIState(
     val records: List<HealthRecord> = emptyList(), // 오늘의 기록
     val cardStates: Map<ItemType, CardState> = emptyMap(), // 카드 상태
+    val message: String? = null // 성공/실패 메시지 추가
 )

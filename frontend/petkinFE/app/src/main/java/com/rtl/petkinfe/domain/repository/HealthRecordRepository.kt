@@ -11,7 +11,7 @@ interface HealthRecordRepository {
     fun getRecordInfo(recordId: Long): HealthRecord
 
     // 새로운 기록 추가
-    fun addRecord(record: HealthRecord): HealthRecord
+    suspend fun addRecord(petId: Long, record: HealthRecord): HealthRecord
 
     // 기록 수정
     fun updateRecord(record: HealthRecord): HealthRecord

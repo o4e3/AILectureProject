@@ -35,8 +35,8 @@ data class CreateHealthRecordRequest(
     @SerializedName("item_id")
     val itemId: Int,
     val memo: String,
-    val timestamp: String // ISO 8601 형식 (예: 2024-11-21T15:30:00)
 )
+
 
 // Response DTO for creating a health record
 data class CreateHealthRecordResponse(
