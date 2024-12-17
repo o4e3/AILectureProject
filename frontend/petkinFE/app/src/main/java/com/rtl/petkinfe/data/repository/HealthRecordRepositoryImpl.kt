@@ -1,5 +1,7 @@
 package com.rtl.petkinfe.data.repository
 
+import com.rtl.petkinfe.data.mapper.toCreateHealthRecordRequest
+import com.rtl.petkinfe.data.mapper.toDomain
 import com.rtl.petkinfe.data.remote.api.HealthRecordApi
 import com.rtl.petkinfe.domain.model.HealthRecord
 import com.rtl.petkinfe.domain.repository.HealthRecordRepository
@@ -16,8 +18,9 @@ class HealthRecordRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override fun addRecord(record: HealthRecord): HealthRecord {
-        TODO("Not yet implemented")
+    override suspend fun addRecord(petId: Long, record: HealthRecord): HealthRecord {
+        val response = healthRecordApi.createHealthRecord(record.toCreateHealthRecordRequest(petId))
+        return response.toDomain(record)
     }
 
     override fun updateRecord(record: HealthRecord): HealthRecord {

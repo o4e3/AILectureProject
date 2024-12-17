@@ -3,10 +3,12 @@ package com.rtl.petkinfe.domain.model
 import androidx.compose.ui.graphics.Color
 
 data class HealthRecord(
-    val recordId: Long,
+    val recordId: Long?,
     val itemType: ItemType,
     val memo: String? = null
-)
+) {
+
+}
 
 
 // 기록 유형 Enum 정의
