@@ -257,37 +257,3 @@ async def get_health_records_by_month(
         )
         for record in records
     ]
-
-@router.get("/pets/{pet_id}/health-records/pet", response_model=list[HealthRecordDetailResponse], status_code=200)
-async def get_pet_health_records_by_pet(
-    pet_id: int = Path(..., gt=0, description="건강 기록을 조회할 반려동물의 ID"),
-    token: dict = Depends(decode_jwt_token),  # JWT 인증
-    db: Session = Depends(get_db),
-):
-    """
-    특정 반려동물 건강 기록 조회 API
-    """
-    # JWT에서 사용자 인증 정보 확인
-    user_id = token.get("sub")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    # DB에서 해당 반려동물의 건강 기록 조회
-    records = db.query(HealthRecord).filter(HealthRecord.pet_id == pet_id).all()
-
-    if not records:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No health records found for the given pet",
-        )
-
-    # 응답 반환
-    return [
-        HealthRecordDetailResponse(
-            record_id=record.record_id,
-            item_id=record.item_id,
-            memo=record.memo,
-            timestamp=record.timestamp,
-        )
-        for record in records
-    ]
