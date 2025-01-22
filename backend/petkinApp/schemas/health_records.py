@@ -16,6 +16,11 @@ class HealthRecordDetailResponse(BaseModel):
     memo: str
     timestamp: datetime
 
+class HealthRecordUpdateRequest(BaseModel):
+    item_id: int = Field(..., gt=0)
+    memo: str = Field(..., max_length=500)
+    timestamp: datetime = Field(...,)
+
 class HealthRecordDetailByDateResponse(BaseModel):
     record_id: int
     item_id: int
