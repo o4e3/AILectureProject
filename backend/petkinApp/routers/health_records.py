@@ -257,6 +257,7 @@ async def get_health_records_by_month(
         )
         for record in records
     ]
+
 @router.get("/pets/{pet_id}/health-records/pet", response_model=list[HealthRecordDetailResponse], status_code=200)
 async def get_pet_health_records_by_pet(
     pet_id: int = Path(..., gt=0, description="건강 기록을 조회할 반려동물의 ID"),
